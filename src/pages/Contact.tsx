@@ -125,7 +125,9 @@ const Contact = () => {
                   </h3>
                   <div className="space-y-1">
                     {info.details.map((detail, idx) => (
-                      <p key={idx} className="text-gray-900 font-medium">{detail}</p>
+                      <p key={idx} className="text-gray-900 font-medium break-words text-sm">
+                        {detail}
+                      </p>
                     ))}
                   </div>
                   <p className="text-sm text-gray-600">{info.description}</p>
@@ -222,11 +224,18 @@ const Contact = () => {
               {/* Embedded Map */}
               <Card className="border-0 shadow-xl">
                 <CardContent className="p-0">
-                  <div className="h-80 bg-gray-200 rounded-lg flex items-center justify-center">
-                    <div className="text-center space-y-2">
-                      <MapPin className="h-12 w-12 text-gray-400 mx-auto" />
-                      <p className="text-gray-600">Interactive Map</p>
-                      <p className="text-sm text-gray-500">Koramangala, Bangalore</p>
+                  <div className="h-80 bg-gradient-to-br from-primary-100 to-accent-100 rounded-lg flex items-center justify-center relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gray-200 opacity-50"></div>
+                    <div className="relative z-10 text-center space-y-3">
+                      <MapPin className="h-16 w-16 text-primary-600 mx-auto" />
+                      <div>
+                        <p className="text-xl font-semibold text-gray-900 mb-2">Visit Our Office</p>
+                        <p className="text-gray-700 font-medium">Koramangala, Bangalore</p>
+                        <p className="text-gray-600">Karnataka, India 560034</p>
+                      </div>
+                      <Button variant="outline" className="mt-4">
+                        Get Directions
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
@@ -253,9 +262,9 @@ const Contact = () => {
                       <div className="bg-blue-100 p-2 rounded-full">
                         <Mail className="h-4 w-4 text-blue-600" />
                       </div>
-                      <div>
+                      <div className="min-w-0 flex-1">
                         <p className="font-medium text-gray-900">Email us directly</p>
-                        <p className="text-sm text-gray-600">support@workshopwise.com</p>
+                        <p className="text-sm text-gray-600 break-all">support@workshopwise.com</p>
                       </div>
                     </div>
                   </div>

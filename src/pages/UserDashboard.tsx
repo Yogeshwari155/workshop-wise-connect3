@@ -3,16 +3,53 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
+import ProfileManagement from '../components/ProfileManagement';
+import EnterpriseDashboard from '../components/EnterpriseDashboard';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { useAuth } from '../contexts/AuthContext';
-import { Calendar, Clock, MapPin, User, Mail, Building, Edit, Star } from 'lucide-react';
+import { Calendar, Clock, MapPin, User, Star, Building } from 'lucide-react';
 
 const UserDashboard = () => {
   const { user } = useAuth();
 
+  // If user is enterprise, show enterprise dashboard
+  if (user?.role === 'enterprise') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <Navigation />
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Tabs defaultValue="dashboard" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-2 lg:w-auto lg:grid-cols-2">
+              <TabsTrigger value="dashboard" className="flex items-center space-x-2">
+                <Building className="h-4 w-4" />
+                <span>Enterprise Dashboard</span>
+              </TabsTrigger>
+              <TabsTrigger value="profile" className="flex items-center space-x-2">
+                <User className="h-4 w-4" />
+                <span>Profile</span>
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="dashboard">
+              <EnterpriseDashboard />
+            </TabsContent>
+
+            <TabsContent value="profile">
+              <ProfileManagement />
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        <Footer />
+      </div>
+    );
+  }
+
+  // Regular user dashboard
   const registeredWorkshops = [
     {
       id: 1,
@@ -213,70 +250,7 @@ const UserDashboard = () => {
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-6">
-            <Card className="border-0 shadow-lg">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="flex items-center space-x-2">
-                  <User className="h-5 w-5" />
-                  <span>Profile Information</span>
-                </CardTitle>
-                <Button variant="outline" size="sm">
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Profile
-                </Button>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-600">Full Name</Label>
-                    <div className="flex items-center space-x-2">
-                      <User className="h-4 w-4 text-gray-400" />
-                      <span className="text-gray-900">{user?.name}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-600">Email Address</Label>
-                    <div className="flex items-center space-x-2">
-                      <Mail className="h-4 w-4 text-gray-400" />
-                      <span className="text-gray-900">{user?.email}</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-600">Account Type</Label>
-                    <div className="flex items-center space-x-2">
-                      <Badge variant="secondary" className="capitalize">
-                        {user?.role}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  {user?.company && (
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-600">Company</Label>
-                      <div className="flex items-center space-x-2">
-                        <Building className="h-4 w-4 text-gray-400" />
-                        <span className="text-gray-900">{user.company}</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="pt-6 border-t">
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <Button variant="outline" className="flex-1">
-                      Change Password
-                    </Button>
-                    <Button variant="outline" className="flex-1">
-                      Download Data
-                    </Button>
-                    <Button variant="destructive" className="flex-1">
-                      Delete Account
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <ProfileManagement />
           </TabsContent>
         </Tabs>
       </div>
@@ -285,11 +259,5 @@ const UserDashboard = () => {
     </div>
   );
 };
-
-const Label = ({ children, className = '', ...props }: any) => (
-  <label className={`block text-sm font-medium ${className}`} {...props}>
-    {children}
-  </label>
-);
 
 export default UserDashboard;
