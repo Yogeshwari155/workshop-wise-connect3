@@ -1,20 +1,19 @@
-
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface User {
-  id: string;
+  id: number;
   name: string;
   email: string;
-  role: 'user' | 'enterprise' | 'admin';
-  company?: string;
+  role: string;
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string, role?: string) => Promise<boolean>;
-  logout: () => void;
-  register: (userData: any) => Promise<boolean>;
   isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<boolean>;
+  register: (userData: any) => Promise<boolean>;
+  logout: () => void;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,54 +26,94 @@ export const useAuth = () => {
   return context;
 };
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = async (email: string, password: string, role?: string): Promise<boolean> => {
-    // Mock login logic
-    if (email === 'admin@workshopwise.com' && password === 'admin123') {
-      setUser({
-        id: '1',
-        name: 'Admin User',
-        email: 'admin@workshopwise.com',
-        role: 'admin'
-      });
-      return true;
-    } else if (email && password) {
-      setUser({
-        id: '2',
-        name: email.split('@')[0],
-        email,
-        role: role === 'enterprise' ? 'enterprise' : 'user',
-        company: role === 'enterprise' ? 'Tech Solutions Inc.' : undefined
-      });
-      return true;
+  const isAuthenticated = !!user;
+
+  useEffect(() => {
+    // Check for saved token on app start
+    const token = localStorage.getItem('authToken');
+    const savedUser = localStorage.getItem('user');
+    
+    if (token && savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (error) {
+        console.error('Error parsing saved user:', error);
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+      }
     }
-    return false;
-  };
+    setLoading(false);
+  }, []);
 
-  const logout = () => {
-    setUser(null);
+  const login = async (email: string, password: string): Promise<boolean> => {
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        setUser(data.user);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
+    }
   };
 
   const register = async (userData: any): Promise<boolean> => {
-    // Mock registration logic
-    setUser({
-      id: Date.now().toString(),
-      name: userData.name || userData.companyName,
-      email: userData.email,
-      role: userData.role || 'user',
-      company: userData.companyName
-    });
-    return true;
+    try {
+      const endpoint = userData.role === 'enterprise' 
+        ? '/api/auth/register/enterprise' 
+        : '/api/auth/register/user';
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        setUser(data.user);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Registration error:', error);
+      return false;
+    }
+  };
+
+  const logout = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+    setUser(null);
   };
 
   const value = {
     user,
+    isAuthenticated,
     login,
-    logout,
     register,
-    isAuthenticated: !!user
+    logout,
+    loading,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

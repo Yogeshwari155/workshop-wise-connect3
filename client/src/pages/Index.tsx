@@ -7,51 +7,11 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Calendar, MapPin, IndianRupee, Users, Award, Clock, Star, ArrowRight, CheckCircle } from 'lucide-react';
+import { useWorkshops } from '../hooks/useWorkshops';
 
 const Index = () => {
-  const featuredWorkshops = [
-    {
-      id: 1,
-      title: "Advanced React Development",
-      company: "TechCorp Solutions",
-      price: 2500,
-      originalPrice: 3500,
-      mode: "Online",
-      duration: "3 days",
-      seats: 25,
-      rating: 4.8,
-      image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=300&fit=crop",
-      tags: ["React", "JavaScript", "Frontend"],
-      isFree: false
-    },
-    {
-      id: 2,
-      title: "Digital Marketing Masterclass",
-      company: "Growth Academy",
-      price: 0,
-      mode: "Hybrid",
-      duration: "2 days",
-      seats: 50,
-      rating: 4.9,
-      image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=400&h=300&fit=crop",
-      tags: ["Marketing", "Strategy", "Business"],
-      isFree: true
-    },
-    {
-      id: 3,
-      title: "Data Science with Python",
-      company: "DataMinds Inc",
-      price: 1800,
-      mode: "Offline",
-      location: "Bangalore",
-      duration: "5 days",
-      seats: 30,
-      rating: 4.7,
-      image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=400&h=300&fit=crop",
-      tags: ["Python", "Data Science", "Analytics"],
-      isFree: false
-    }
-  ];
+  const { data: allWorkshops = [] } = useWorkshops();
+  const featuredWorkshops = allWorkshops.slice(0, 3);
 
   const testimonials = [
     {
@@ -97,12 +57,12 @@ const Index = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8 animate-fade-in-up">
               <div className="space-y-4">
-                <Badge className="bg-gradient-to-r from-primary-500 to-accent-500 text-white border-0 px-4 py-2">
+                <Badge className="bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] text-white border-0 px-4 py-2">
                   🚀 Transform Your Career Today
                 </Badge>
                 <h1 className="text-4xl md:text-6xl font-display font-bold text-gray-900 leading-tight">
                   Learn from the{' '}
-                  <span className="bg-gradient-to-r from-primary-500 to-accent-500 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] bg-clip-text text-transparent">
                     Best Minds
                   </span>{' '}
                   in Industry
@@ -196,7 +156,7 @@ const Index = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredWorkshops.map((workshop) => (
+            {featuredWorkshops.map((workshop: any) => (
               <Card key={workshop.id} className="group hover:shadow-2xl transition-all duration-300 border-0 bg-white rounded-xl overflow-hidden">
                 <div className="relative overflow-hidden">
                   <img 

@@ -9,77 +9,18 @@ import { Card, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Calendar, MapPin, IndianRupee, Users, Clock, Star, Search, Filter } from 'lucide-react';
+import { useWorkshops } from '../hooks/useWorkshops';
 
 const Workshops = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [priceFilter, setPriceFilter] = useState('all');
   const [modeFilter, setModeFilter] = useState('all');
+  
+  const { data: workshops = [], isLoading, error } = useWorkshops();
 
-  const workshops = [
-    {
-      id: 1,
-      title: "Advanced React Development",
-      company: "TechCorp Solutions",
-      price: 2500,
-      originalPrice: 3500,
-      mode: "Online",
-      duration: "3 days",
-      seats: 25,
-      rating: 4.8,
-      image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=300&fit=crop",
-      tags: ["React", "JavaScript", "Frontend"],
-      isFree: false,
-      date: "15 Jan 2025"
-    },
-    {
-      id: 2,
-      title: "Digital Marketing Masterclass",
-      company: "Growth Academy",
-      price: 0,
-      mode: "Hybrid",
-      duration: "2 days",
-      seats: 50,
-      rating: 4.9,
-      image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=400&h=300&fit=crop",
-      tags: ["Marketing", "Strategy", "Business"],
-      isFree: true,
-      date: "20 Jan 2025"
-    },
-    {
-      id: 3,
-      title: "Data Science with Python",
-      company: "DataMinds Inc",
-      price: 1800,
-      mode: "Offline",
-      location: "Bangalore",
-      duration: "5 days",
-      seats: 30,
-      rating: 4.7,
-      image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=400&h=300&fit=crop",
-      tags: ["Python", "Data Science", "Analytics"],
-      isFree: false,
-      date: "25 Jan 2025"
-    },
-    {
-      id: 4,
-      title: "UI/UX Design Bootcamp",
-      company: "Design Studio",
-      price: 3200,
-      mode: "Online",
-      duration: "4 days",
-      seats: 40,
-      rating: 4.6,
-      image: "https://images.unsplash.com/photo-1559028006-448665bd7c7f?w=400&h=300&fit=crop",
-      tags: ["Design", "UI/UX", "Figma"],
-      isFree: false,
-      date: "30 Jan 2025"
-    }
-  ];
-
-  const filteredWorkshops = workshops.filter(workshop => {
+  const filteredWorkshops = workshops.filter((workshop: any) => {
     const matchesSearch = workshop.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         workshop.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         workshop.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+                         workshop.tags?.some((tag: string) => tag.toLowerCase().includes(searchTerm.toLowerCase()));
     
     const matchesPrice = priceFilter === 'all' || 
                         (priceFilter === 'free' && workshop.isFree) ||
@@ -89,6 +30,30 @@ const Workshops = () => {
     
     return matchesSearch && matchesPrice && matchesMode;
   });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <Navigation />
+        <div className="flex items-center justify-center py-20">
+          <div className="text-xl text-gray-600">Loading workshops...</div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <Navigation />
+        <div className="flex items-center justify-center py-20">
+          <div className="text-xl text-red-600">Error loading workshops</div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">

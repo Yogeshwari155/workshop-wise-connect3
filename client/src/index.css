@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --primary-500: #8B5CF6;
+  --accent-500: #7C3AED;
+  --tw-gradient-to: #8B5CF6 var(--tw-gradient-to-position);
+}
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
 
 @layer base {
