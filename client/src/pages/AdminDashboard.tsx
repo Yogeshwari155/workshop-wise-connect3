@@ -327,6 +327,90 @@ const AdminDashboard = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="registrations">
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  {selectedWorkshop ? `Registrations: ${selectedWorkshop.title}` : 'Select a Workshop'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {selectedWorkshop ? (
+                  registrationsLoading ? (
+                    <div className="text-center py-8">
+                      <div className="text-gray-500">Loading registrations...</div>
+                    </div>
+                  ) : registrations.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="text-gray-500">No registrations found for this workshop.</div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {registrations.map((registration: any) => (
+                        <div key={registration.id} className="border rounded-lg p-4">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <h4 className="font-semibold">{registration.user?.name}</h4>
+                              <p className="text-gray-600">{registration.user?.email}</p>
+                              {registration.reason && (
+                                <p className="text-sm text-gray-500 mt-1">
+                                  Reason: "{registration.reason}"
+                                </p>
+                              )}
+                              <p className="text-xs text-gray-400 mt-1">
+                                Registered: {new Date(registration.createdAt).toLocaleString()}
+                              </p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Badge 
+                                className={
+                                  registration.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                                  registration.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                                  'bg-yellow-100 text-yellow-800'
+                                }
+                              >
+                                {registration.status}
+                              </Badge>
+                              
+                              {registration.status === 'pending' && (
+                                <div className="flex space-x-2">
+                                  <Button
+                                    size="sm"
+                                    onClick={() => approveRegistrationMutation.mutate(registration.id)}
+                                    disabled={approveRegistrationMutation.isPending}
+                                    className="bg-green-600 hover:bg-green-700 text-white"
+                                  >
+                                    <CheckCircle className="h-4 w-4 mr-1" />
+                                    Approve
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => rejectRegistrationMutation.mutate(registration.id)}
+                                    disabled={rejectRegistrationMutation.isPending}
+                                  >
+                                    <XCircle className="h-4 w-4 mr-1" />
+                                    Reject
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="text-gray-500">
+                      Click "View Registrations" on any workshop to see its registrations.
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
 

@@ -42,12 +42,16 @@ WorkshopWise is a comprehensive workshop booking platform that connects professi
 
 ## Recent Changes
 - ✅ Set up PostgreSQL database with complete schema
-- ✅ Implemented JWT authentication system
+- ✅ Implemented JWT authentication system with role-based access control
 - ✅ Created comprehensive API endpoints for all user roles
 - ✅ Added database seeding with sample data
-- ✅ Connected frontend with backend API
+- ✅ Connected frontend with backend API (real-time data, no mock data)
 - ✅ Updated color scheme to match user requirements (#8B5CF6)
-- ✅ Implemented real data fetching in workshop components
+- ✅ Fixed enterprise registration flow and validation
+- ✅ Enhanced admin dashboard with workshop approval/rejection functionality
+- ✅ Added real-time UI updates for workshop status changes
+- ✅ Implemented protected routes with role-based navigation
+- ✅ Fixed workshop filtering to show only approved workshops to users
 
 ## Default Test Accounts
 - Admin: admin@workshopwise.com / admin123
