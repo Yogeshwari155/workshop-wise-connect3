@@ -1,0 +1,168 @@
+Here's your **complete, detailed prompt** to give to **Replit AI (Ghostwriter/Agent)** to build a **fully functional full-stack Workshop Booking Web App** — including **UI updates**, **backend logic**, and **real-time features** (like status changes, live approval updates, Google Meet links, and dynamic data loading).
+
+---
+
+## 💡 ✅ FULL REPLIT AI PROMPT — UI + BACKEND + REAL-TIME FEATURES
+
+> Paste this into Replit AI (Ghostwriter or the AI Agent) to generate a complete project:
+
+---
+
+### Prompt:
+
+I have a frontend UI design for a **Workshop Booking Website**, and I need you to now **build the complete full-stack application**. This includes the **backend (Node.js + Express + PostgreSQL or MongoDB)** and updating the **frontend UI** to fully support role-based access, live data updates, and workshop logic.
+
+---
+
+### 👥 1. ROLES & ACCESS (RBAC):
+
+* **User**:
+
+  * Can browse and register for workshops
+  * Can see only *approved* workshops
+  * Has a "My Workshops" page with registration status
+* **Enterprise**:
+
+  * Can log in and create workshops
+  * Can manage their workshops and view users who registered
+* **Admin**:
+
+  * Can approve/reject workshops
+  * Can approve/reject manual registration requests
+  * Can manage all users, workshops, and enterprises
+
+**Use JWT auth** with protected routes and role-based middleware.
+
+---
+
+### 🔐 2. AUTHENTICATION
+
+* Use **JWT** for login/signup
+* Separate login portals per role (Admin, User, Enterprise)
+* Encrypt passwords with **bcrypt**
+* Secure protected pages via middleware
+
+---
+
+### 🏗️ 3. FRONTEND UI CHANGES NEEDED:
+
+> The UI should respond in real-time based on backend data using **live API data**, and **conditional rendering** for each role.
+
+#### ✅ Home Page:
+
+* Display **only approved workshops**
+* Add filters: mode (online/offline), type (free/paid), tags
+
+#### ✅ Workshop Details:
+
+* Show full details: title, desc, date, mode, free/paid
+* Based on workshop properties:
+
+  * If **free + auto** → register instantly
+  * If **paid + auto** → redirect to Google Form
+  * If **online** → after success, show generated **Google Meet link**
+  * If **manual registration** → show "Request Registration" → wait for admin approval
+
+#### ✅ My Workshops (User):
+
+* List all registered workshops with:
+
+  * Workshop title, mode
+  * Registration status (Pending / Confirmed / Rejected)
+  * Google Meet link if applicable
+
+#### ✅ Enterprise Dashboard:
+
+* Create Workshop form:
+
+  * Fields: title, description, tags, mode, date/time, free/paid, registration type
+* View own workshops
+
+  * Show status: pending/approved/rejected
+  * View list of registered users per workshop
+
+#### ✅ Admin Dashboard:
+
+* View all users and enterprises
+* Approve/reject workshops submitted by enterprises
+* View and manage manual registration requests
+* Delete/edit any user, enterprise, or workshop
+* View uploaded payment screenshots (if needed)
+
+---
+
+### 🧠 4. BACKEND FEATURES (FUNCTIONALITY)
+
+#### Workshop Model Includes:
+
+* `title`, `description`, `tags`, `mode`, `registration_type`, `price`, `status`, `created_by`, `meet_link`
+
+#### 🛠 Workshop Flow:
+
+* Enterprise submits workshop → status = "pending"
+* Admin reviews and sets it to "approved"
+* If auto + online → generate Google Meet link
+
+#### 🧾 Registration Flow:
+
+* User registers
+
+  * If manual → store with `status = pending`
+  * If auto → confirm directly
+* Admin can approve/reject manual registrations
+
+#### 💬 Real-Time:
+
+* Use **live data rendering (no hardcoded data)**
+* Show updated statuses on all dashboards
+* Confirm registration in real-time
+
+---
+
+### 🧩 5. TECH STACK REQUIREMENTS:
+
+* **Backend**: Node.js + Express
+* **Database**: PostgreSQL (or MongoDB)
+* **Auth**: JWT + Bcrypt
+* **Frontend**: HTML/CSS/JS or React (update existing UI)
+* Use modern UI libraries like **Tailwind** or **Bootstrap**
+* Structure backend cleanly: `routes/`, `controllers/`, `models/`, `middlewares/`, `utils/`
+
+---
+
+### 🌐 6. REAL-TIME BEHAVIOR TO SIMULATE:
+
+* Only show workshops after admin approval
+* Show updated registration status instantly on My Workshops / Admin panels
+* Automatically show generated **Google Meet link** after auto-confirmation
+* Status tags change dynamically (`Paid`, `Online`, `Confirmed`, etc.)
+
+---
+
+### 🧾 7. OPTIONAL BONUS:
+
+* Add pagination & search to workshop lists
+* Filter by tag, date, and mode
+* Add light/dark theme toggle
+
+---
+
+**Final Output** should be a:
+
+* Complete backend (with authentication, models, CRUD, middleware)
+* Updated frontend that renders **live data** from the backend
+* Fully functional app with real-time logic tied to role-based behavior
+
+---
+
+Let me know if you want:
+
+* A Postman collection for testing the APIs
+* Database schema diagram
+* UI/UX mockups or flowcharts
+
+✅ This app should be production-ready and easy to deploy on Replit, Vercel, or Netlify.
+
+---
+
+Would you like a **ready-made GitHub README.md** for this full-stack app too?
