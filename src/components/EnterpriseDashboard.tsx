@@ -41,7 +41,9 @@ const EnterpriseDashboard = () => {
     location: '',
     duration: '',
     seats: '',
-    registrationMode: 'manual'
+    registrationMode: 'manual',
+    date: '',
+    time: ''
   });
 
   // Mock data for enterprise workshops
@@ -50,31 +52,37 @@ const EnterpriseDashboard = () => {
       id: 1,
       title: "Advanced React Development",
       date: "15 Jan 2025",
+      time: "10:00 AM",
       status: "Active",
       registrations: 18,
       totalSeats: 25,
       mode: "Online",
-      price: 2500
+      price: 2500,
+      registrationMode: "automated"
     },
     {
       id: 2,
       title: "JavaScript Fundamentals",
       date: "20 Jan 2025",
+      time: "2:00 PM",
       status: "Active",
       registrations: 30,
       totalSeats: 30,
       mode: "Hybrid",
-      price: 1800
+      price: 1800,
+      registrationMode: "manual"
     },
     {
       id: 3,
       title: "Web Development Bootcamp",
       date: "5 Jan 2025",
+      time: "9:00 AM",
       status: "Closed",
       registrations: 50,
       totalSeats: 50,
       mode: "Offline",
-      price: 3500
+      price: 3500,
+      registrationMode: "manual"
     }
   ];
 
@@ -82,30 +90,33 @@ const EnterpriseDashboard = () => {
   const userRegistrations = [
     {
       id: 1,
-      workshopTitle: "Advanced React Development",
+      workshopTitle: "JavaScript Fundamentals",
       userName: "Priya Sharma",
       userEmail: "priya@example.com",
       registrationDate: "12 Jan 2025",
       status: "pending",
-      paymentStatus: "paid"
+      paymentStatus: "paid",
+      reason: "I want to strengthen my JavaScript foundation for my current web development role and learn modern ES6+ features."
     },
     {
       id: 2,
-      workshopTitle: "Advanced React Development",
+      workshopTitle: "JavaScript Fundamentals",
       userName: "Rajesh Kumar",
       userEmail: "rajesh@example.com",
       registrationDate: "11 Jan 2025",
       status: "approved",
-      paymentStatus: "paid"
+      paymentStatus: "paid",
+      reason: "Looking to transition from backend to full-stack development and need solid JavaScript skills."
     },
     {
       id: 3,
-      workshopTitle: "JavaScript Fundamentals",
+      workshopTitle: "Web Development Bootcamp",
       userName: "Sneha Patel",
       userEmail: "sneha@example.com",
       registrationDate: "10 Jan 2025",
       status: "pending",
-      paymentStatus: "pending"
+      paymentStatus: "pending",
+      reason: "Complete beginner wanting to learn web development from scratch to start my career in tech."
     }
   ];
 
@@ -128,7 +139,9 @@ const EnterpriseDashboard = () => {
         location: '',
         duration: '',
         seats: '',
-        registrationMode: 'manual'
+        registrationMode: 'manual',
+        date: '',
+        time: ''
       });
       setIsCreatingWorkshop(false);
     } catch (error) {
@@ -149,7 +162,7 @@ const EnterpriseDashboard = () => {
       
       toast({
         title: "Registration Approved ✅",
-        description: "User has been notified via email.",
+        description: "User has been notified via email and given access details.",
       });
     } catch (error) {
       toast({
@@ -179,6 +192,27 @@ const EnterpriseDashboard = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteWorkshop = async (workshopId: number) => {
+    if (window.confirm('Are you sure you want to delete this workshop? This action cannot be undone.')) {
+      setLoading(true);
+      try {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        toast({
+          title: "Workshop Deleted",
+          description: "The workshop has been successfully removed.",
+        });
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Deletion Failed",
+          description: "Please try again.",
+        });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -296,9 +330,9 @@ const EnterpriseDashboard = () => {
                         <SelectValue placeholder="Select mode" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="online">Online</SelectItem>
-                        <SelectItem value="offline">Offline</SelectItem>
-                        <SelectItem value="hybrid">Hybrid</SelectItem>
+                        <SelectItem value="Online">Online</SelectItem>
+                        <SelectItem value="Offline">Offline</SelectItem>
+                        <SelectItem value="Hybrid">Hybrid</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -312,6 +346,25 @@ const EnterpriseDashboard = () => {
                     placeholder="Describe what participants will learn..."
                     rows={4}
                   />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Date</Label>
+                    <Input
+                      type="date"
+                      value={newWorkshop.date}
+                      onChange={(e) => setNewWorkshop({...newWorkshop, date: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Time</Label>
+                    <Input
+                      type="time"
+                      value={newWorkshop.time}
+                      onChange={(e) => setNewWorkshop({...newWorkshop, time: e.target.value})}
+                    />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -343,7 +396,7 @@ const EnterpriseDashboard = () => {
                   </div>
                 </div>
 
-                {newWorkshop.mode === 'offline' && (
+                {(newWorkshop.mode === 'Offline' || newWorkshop.mode === 'Hybrid') && (
                   <div className="space-y-2">
                     <Label>Location</Label>
                     <Input
@@ -362,7 +415,7 @@ const EnterpriseDashboard = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="manual">Manual Approval</SelectItem>
-                      <SelectItem value="automatic">Automatic Registration</SelectItem>
+                      <SelectItem value="automated">Automatic Registration</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -408,10 +461,17 @@ const EnterpriseDashboard = () => {
                           <span>{workshop.date}</span>
                         </div>
                         <div className="flex items-center space-x-1">
+                          <Clock className="h-4 w-4" />
+                          <span>{workshop.time}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
                           <Users className="h-4 w-4" />
                           <span>{workshop.registrations}/{workshop.totalSeats} registered</span>
                         </div>
                         <Badge variant="secondary">{workshop.mode}</Badge>
+                        <Badge variant={workshop.registrationMode === 'automated' ? 'default' : 'secondary'}>
+                          {workshop.registrationMode}
+                        </Badge>
                         <span className="font-medium">₹{workshop.price}</span>
                       </div>
                     </div>
@@ -426,7 +486,12 @@ const EnterpriseDashboard = () => {
                     <Button variant="outline" size="sm">
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-red-600 hover:text-red-700"
+                      onClick={() => handleDeleteWorkshop(workshop.id)}
+                    >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -440,56 +505,61 @@ const EnterpriseDashboard = () => {
       {/* User Registrations */}
       <Card className="border-0 shadow-lg">
         <CardHeader>
-          <CardTitle>User Registrations</CardTitle>
+          <CardTitle>User Registrations Pending Approval</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {userRegistrations.map((registration) => (
-              <div key={registration.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-4">
-                    <div>
-                      <h4 className="font-semibold text-gray-900">{registration.userName}</h4>
-                      <p className="text-sm text-gray-600">{registration.userEmail}</p>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <span className="text-sm text-gray-500">Workshop:</span>
-                        <span className="text-sm font-medium">{registration.workshopTitle}</span>
-                      </div>
+            {userRegistrations.filter(r => r.status === 'pending').map((registration) => (
+              <div key={registration.id} className="border rounded-lg p-4">
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900">{registration.userName}</h4>
+                    <p className="text-sm text-gray-600">{registration.userEmail}</p>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <span className="text-sm text-gray-500">Workshop:</span>
+                      <span className="text-sm font-medium">{registration.workshopTitle}</span>
                     </div>
+                    <div className="text-right">
+                      <div className="text-sm text-gray-500">Registered on</div>
+                      <div className="text-sm font-medium">{registration.registrationDate}</div>
+                    </div>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button 
+                      size="sm"
+                      onClick={() => handleApproveRegistration(registration.id)}
+                      disabled={loading}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      <CheckCircle className="h-4 w-4 mr-1" />
+                      Approve
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleRejectRegistration(registration.id)}
+                      disabled={loading}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <XCircle className="h-4 w-4 mr-1" />
+                      Reject
+                    </Button>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <div className="text-right">
-                    <div className="text-sm text-gray-500">Registered on</div>
-                    <div className="text-sm font-medium">{registration.registrationDate}</div>
-                  </div>
-                  {getStatusBadge(registration.status)}
-                  {registration.status === 'pending' && (
-                    <div className="flex space-x-2">
-                      <Button 
-                        size="sm"
-                        onClick={() => handleApproveRegistration(registration.id)}
-                        disabled={loading}
-                        className="bg-green-600 hover:bg-green-700"
-                      >
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        Approve
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleRejectRegistration(registration.id)}
-                        disabled={loading}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <XCircle className="h-4 w-4 mr-1" />
-                        Reject
-                      </Button>
-                    </div>
-                  )}
+                <div className="bg-gray-50 rounded p-3">
+                  <p className="text-sm font-medium text-gray-700 mb-1">Why they want to join:</p>
+                  <p className="text-sm text-gray-700">{registration.reason}</p>
                 </div>
               </div>
             ))}
+            
+            {userRegistrations.filter(r => r.status === 'pending').length === 0 && (
+              <div className="text-center py-8">
+                <CheckCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">All caught up!</h3>
+                <p className="text-gray-600">No pending registrations to review.</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

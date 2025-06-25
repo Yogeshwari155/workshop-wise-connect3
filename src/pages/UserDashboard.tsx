@@ -1,19 +1,55 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import ProfileManagement from '../components/ProfileManagement';
 import EnterpriseDashboard from '../components/EnterpriseDashboard';
+import WorkshopRegistrationModal from '../components/WorkshopRegistrationModal';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { useAuth } from '../contexts/AuthContext';
-import { Calendar, Clock, MapPin, User, Star, Building } from 'lucide-react';
+import { useToast } from '../hooks/use-toast';
+import { Calendar, Clock, MapPin, User, Star, Building, ExternalLink, Users, Plus } from 'lucide-react';
 
 const UserDashboard = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const [selectedWorkshop, setSelectedWorkshop] = useState(null);
+  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+
+  // Mock available workshops for registration
+  const availableWorkshops = [
+    {
+      id: 4,
+      title: "Python for Beginners",
+      company: "CodeAcademy",
+      date: "25 Jan 2025",
+      time: "11:00 AM",
+      mode: "Online",
+      price: 0,
+      seats: 30,
+      registeredSeats: 15,
+      registrationMode: "automated",
+      image: "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=300&h=200&fit=crop"
+    },
+    {
+      id: 5,
+      title: "UI/UX Design Workshop",
+      company: "Design Studio",
+      date: "30 Jan 2025",
+      time: "2:00 PM",
+      mode: "Hybrid",
+      location: "Mumbai",
+      price: 1500,
+      seats: 20,
+      registeredSeats: 8,
+      registrationMode: "manual",
+      image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=300&h=200&fit=crop"
+    }
+  ];
 
   // If user is enterprise, show enterprise dashboard
   if (user?.role === 'enterprise') {
@@ -49,7 +85,7 @@ const UserDashboard = () => {
     );
   }
 
-  // Regular user dashboard
+  // Enhanced registered workshops with meet links and status
   const registeredWorkshops = [
     {
       id: 1,
@@ -59,6 +95,7 @@ const UserDashboard = () => {
       time: "10:00 AM",
       mode: "Online",
       status: "confirmed",
+      meetLink: "https://meet.google.com/abc-defg-hij",
       image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=300&h=200&fit=crop"
     },
     {
@@ -84,6 +121,12 @@ const UserDashboard = () => {
       image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=300&h=200&fit=crop"
     }
   ];
+
+  const handleWorkshopRegistration = (workshopId: number, registrationData: any) => {
+    console.log('Registration data:', registrationData);
+    // In real app, this would call an API
+    setShowRegistrationModal(false);
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -112,11 +155,15 @@ const UserDashboard = () => {
           </p>
         </div>
 
-        <Tabs defaultValue="workshops" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:w-auto lg:grid-cols-2">
-            <TabsTrigger value="workshops" className="flex items-center space-x-2">
+        <Tabs defaultValue="my-workshops" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:grid-cols-3">
+            <TabsTrigger value="my-workshops" className="flex items-center space-x-2">
               <Calendar className="h-4 w-4" />
               <span>My Workshops</span>
+            </TabsTrigger>
+            <TabsTrigger value="available" className="flex items-center space-x-2">
+              <Plus className="h-4 w-4" />
+              <span>Available</span>
             </TabsTrigger>
             <TabsTrigger value="profile" className="flex items-center space-x-2">
               <User className="h-4 w-4" />
@@ -124,7 +171,7 @@ const UserDashboard = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="workshops" className="space-y-6">
+          <TabsContent value="my-workshops" className="space-y-6">
             {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <Card className="border-0 shadow-lg">
@@ -161,16 +208,11 @@ const UserDashboard = () => {
               </Card>
             </div>
 
-            {/* Workshop List */}
+            {/* Registered Workshop List */}
             <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-display font-semibold text-gray-900">
-                  Your Workshops
-                </h2>
-                <Link to="/workshops">
-                  <Button variant="outline">Browse More Workshops</Button>
-                </Link>
-              </div>
+              <h2 className="text-xl font-display font-semibold text-gray-900">
+                Your Registered Workshops
+              </h2>
 
               {registeredWorkshops.length === 0 ? (
                 <Card className="border-0 shadow-lg">
@@ -239,6 +281,33 @@ const UserDashboard = () => {
                                 </div>
                               )}
                             </div>
+
+                            {/* Google Meet Link for Online Confirmed Workshops */}
+                            {workshop.mode === 'Online' && workshop.status === 'confirmed' && workshop.meetLink && (
+                              <div className="bg-green-50 p-3 rounded-lg">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm font-medium text-green-800">Meeting Link Ready</span>
+                                  <a 
+                                    href={workshop.meetLink} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="flex items-center space-x-1 text-sm text-green-600 hover:text-green-800"
+                                  >
+                                    <span>Join Meeting</span>
+                                    <ExternalLink className="h-3 w-3" />
+                                  </a>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Pending Request Status */}
+                            {workshop.status === 'pending' && (
+                              <div className="bg-yellow-50 p-3 rounded-lg">
+                                <span className="text-sm font-medium text-yellow-800">
+                                  Request Sent to Admin - Awaiting Approval
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </CardContent>
@@ -249,11 +318,97 @@ const UserDashboard = () => {
             </div>
           </TabsContent>
 
+          <TabsContent value="available" className="space-y-6">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-display font-semibold text-gray-900">
+                  Available Workshops
+                </h2>
+                <Link to="/workshops">
+                  <Button variant="outline">View All Workshops</Button>
+                </Link>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {availableWorkshops.map((workshop) => (
+                  <Card key={workshop.id} className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+                    <CardContent className="p-0">
+                      <div className="flex">
+                        <img 
+                          src={workshop.image} 
+                          alt={workshop.title}
+                          className="w-24 h-24 object-cover rounded-l-lg"
+                        />
+                        <div className="flex-1 p-4 space-y-3">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="font-semibold text-gray-900">{workshop.title}</h3>
+                              <p className="text-sm text-gray-600">{workshop.company}</p>
+                            </div>
+                            <div className="flex space-x-2">
+                              <Badge variant={workshop.registrationMode === 'automated' ? 'default' : 'secondary'}>
+                                {workshop.registrationMode === 'automated' ? 'Instant' : 'Manual'}
+                              </Badge>
+                              {workshop.price === 0 && (
+                                <Badge className="bg-green-500 text-white">FREE</Badge>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center space-x-4 text-sm text-gray-600">
+                            <div className="flex items-center space-x-1">
+                              <Calendar className="h-4 w-4" />
+                              <span>{workshop.date}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <Clock className="h-4 w-4" />
+                              <span>{workshop.time}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-4 text-sm">
+                              <Badge variant="secondary">{workshop.mode}</Badge>
+                              <div className="flex items-center space-x-1 text-gray-600">
+                                <Users className="h-3 w-3" />
+                                <span>{workshop.seats - workshop.registeredSeats} seats left</span>
+                              </div>
+                              {workshop.price > 0 && (
+                                <span className="font-medium text-green-600">₹{workshop.price}</span>
+                              )}
+                            </div>
+                            <Button 
+                              size="sm"
+                              onClick={() => {
+                                setSelectedWorkshop(workshop);
+                                setShowRegistrationModal(true);
+                              }}
+                              disabled={workshop.seats <= workshop.registeredSeats}
+                            >
+                              Register
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
           <TabsContent value="profile" className="space-y-6">
             <ProfileManagement />
           </TabsContent>
         </Tabs>
       </div>
+
+      <WorkshopRegistrationModal
+        workshop={selectedWorkshop}
+        isOpen={showRegistrationModal}
+        onClose={() => setShowRegistrationModal(false)}
+        onRegister={handleWorkshopRegistration}
+      />
 
       <Footer />
     </div>
