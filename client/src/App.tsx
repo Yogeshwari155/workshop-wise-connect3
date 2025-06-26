@@ -71,6 +71,12 @@ const AppRoutes = () => {
         </PrivateRoute>
       } />
 
+      <Route path="/enterprise" element={
+        <PrivateRoute allowedRoles={['enterprise']}>
+          <EnterpriseDashboard />
+        </PrivateRoute>
+      } />
+
       <Route path="/admin" element={
         <PrivateRoute allowedRoles={['admin']}>
           <AdminDashboard />
