@@ -7,6 +7,10 @@ export async function seedDatabase() {
   try {
     console.log("🌱 Seeding database...");
 
+    // Test database connection first
+    await db.select().from(users).limit(1);
+    console.log("✅ Database connection successful");
+
     // Create admin user
     const adminExists = await db.select().from(users).where(eq(users.email, 'admin@workshopwise.com')).limit(1);
 

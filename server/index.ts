@@ -38,8 +38,18 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Seed database on startup
-  await seedDatabase();
+  // Seed database on startup with timeout
+  try {
+    await Promise.race([
+      seedDatabase(),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database seeding timeout')), 30000)
+      )
+    ]);
+  } catch (error) {
+    console.error('Database seeding failed:', error.message);
+    console.log('Continuing without seeding...');
+  }
   
   const server = await registerRoutes(app);
 
