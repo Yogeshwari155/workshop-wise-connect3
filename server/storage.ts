@@ -1,26 +1,9 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
-import { eq, and, desc } from "drizzle-orm";
-import { 
-  users, 
-  enterprises, 
-  workshops, 
-  registrations,
-  type User, 
-  type InsertUser,
-  type Enterprise,
-  type InsertEnterprise,
-  type Workshop,
-  type InsertWorkshop,
-  type Registration,
-  type InsertRegistration
-} from "@shared/schema";
+import { db } from "./db";
+import { users, enterprises, workshops, registrations } from "@shared/schema";
+import type { User, Enterprise, Workshop, Registration, InsertUser, InsertEnterprise, InsertWorkshop, InsertRegistration } from "@shared/schema";
+import { eq, desc, and } from "drizzle-orm";
 
-const connectionString = process.env.DATABASE_URL!;
-const client = postgres(connectionString);
-export const db = drizzle(client);
-
-export interface IStorage {
+interface IStorage {
   // User methods
   getUserById(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
@@ -39,9 +22,9 @@ export interface IStorage {
 
   // Workshop methods
   getWorkshopById(id: number): Promise<Workshop | undefined>;
-  getWorkshopsByEnterpriseId(enterpriseId: number): Promise<Workshop[]>;
-  getAllWorkshops(): Promise<Workshop[]>;
   getApprovedWorkshops(): Promise<Workshop[]>;
+  getAllWorkshops(): Promise<Workshop[]>;
+  getWorkshopsByEnterpriseId(enterpriseId: number): Promise<Workshop[]>;
   createWorkshop(workshop: InsertWorkshop): Promise<Workshop>;
   updateWorkshop(id: number, updates: Partial<InsertWorkshop>): Promise<Workshop | undefined>;
   deleteWorkshop(id: number): Promise<boolean>;
@@ -83,7 +66,7 @@ export class PostgresStorage implements IStorage {
   }
 
   async deleteUser(id: number): Promise<boolean> {
-    const result = await db.delete(users).where(eq(users.id, id));
+    const result = await db.delete(users).where(eq(users.id, id)).returning();
     return result.length > 0;
   }
 
@@ -123,16 +106,16 @@ export class PostgresStorage implements IStorage {
     return result[0];
   }
 
-  async getWorkshopsByEnterpriseId(enterpriseId: number): Promise<Workshop[]> {
-    return await db.select().from(workshops).where(eq(workshops.enterpriseId, enterpriseId)).orderBy(desc(workshops.createdAt));
+  async getApprovedWorkshops(): Promise<Workshop[]> {
+    return await db.select().from(workshops).where(eq(workshops.status, 'approved')).orderBy(desc(workshops.createdAt));
   }
 
   async getAllWorkshops(): Promise<Workshop[]> {
     return await db.select().from(workshops).orderBy(desc(workshops.createdAt));
   }
 
-  async getApprovedWorkshops(): Promise<Workshop[]> {
-    return await db.select().from(workshops).where(eq(workshops.status, 'approved')).orderBy(desc(workshops.createdAt));
+  async getWorkshopsByEnterpriseId(enterpriseId: number): Promise<Workshop[]> {
+    return await db.select().from(workshops).where(eq(workshops.enterpriseId, enterpriseId)).orderBy(desc(workshops.createdAt));
   }
 
   async createWorkshop(workshop: InsertWorkshop): Promise<Workshop> {
@@ -146,7 +129,7 @@ export class PostgresStorage implements IStorage {
   }
 
   async deleteWorkshop(id: number): Promise<boolean> {
-    const result = await db.delete(workshops).where(eq(workshops.id, id));
+    const result = await db.delete(workshops).where(eq(workshops.id, id)).returning();
     return result.length > 0;
   }
 
@@ -175,7 +158,7 @@ export class PostgresStorage implements IStorage {
   }
 
   async deleteRegistration(id: number): Promise<boolean> {
-    const result = await db.delete(registrations).where(eq(registrations.id, id));
+    const result = await db.delete(registrations).where(eq(registrations.id, id)).returning();
     return result.length > 0;
   }
 

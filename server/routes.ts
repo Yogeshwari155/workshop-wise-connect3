@@ -21,7 +21,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
   app.post('/api/auth/login', async (req, res) => {
     try {
-      const { email, password } = loginSchema.parse(req.body);
+      console.log('Login request:', req.body);
+      
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ message: 'Email and password are required' });
+      }
 
       const user = await storage.getUserByEmail(email);
       if (!user) {
@@ -45,7 +51,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
     } catch (error) {
-      res.status(400).json({ message: 'Invalid request data' });
+      console.error('Login error:', error);
+      res.status(500).json({ message: 'Server error' });
     }
   });
 
@@ -247,9 +254,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Determine registration status
       let status = 'pending';
+      let shouldUpdateSeats = false;
+
       if (workshop.registrationMode === 'automated') {
-        status = 'confirmed';
-        // Update registered seats count
+        if (workshop.isFree) {
+          status = 'confirmed';
+          shouldUpdateSeats = true;
+        } else {
+          // For paid workshops, check if payment screenshot is provided
+          if (registrationData.paymentScreenshot) {
+            status = 'confirmed';
+            shouldUpdateSeats = true;
+          } else {
+            return res.status(400).json({ message: 'Payment screenshot required for paid workshops' });
+          }
+        }
+      }
+
+      if (shouldUpdateSeats) {
         await storage.updateWorkshop(workshop.id, {
           registeredSeats: workshop.registeredSeats + 1
         });
@@ -261,8 +283,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status
       });
 
-      res.status(201).json(registration);
+      res.status(201).json({
+        registration,
+        message: status === 'confirmed' ? 'Successfully registered!' : 'Registration pending approval'
+      });
     } catch (error) {
+      console.error('Registration error:', error);
       res.status(400).json({ message: 'Invalid request data' });
     }
   });
@@ -295,6 +321,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const workshops = await storage.getWorkshopsByEnterpriseId(enterprise.id);
       res.json(workshops);
+    } catch (error) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+
+  app.put('/api/workshops/:id', authenticateToken, requireRole(['enterprise']), async (req: AuthRequest, res) => {
+    try {
+      const enterprise = await storage.getEnterpriseByUserId(req.user!.id);
+      if (!enterprise) {
+        return res.status(400).json({ message: 'Enterprise profile not found' });
+      }
+
+      const workshop = await storage.getWorkshopById(parseInt(req.params.id));
+      if (!workshop || workshop.enterpriseId !== enterprise.id) {
+        return res.status(403).json({ message: 'Workshop not found or access denied' });
+      }
+
+      const workshopData = insertWorkshopSchema.parse(req.body);
+      const updatedWorkshop = await storage.updateWorkshop(parseInt(req.params.id), workshopData);
+      
+      res.json(updatedWorkshop);
+    } catch (error) {
+      res.status(400).json({ message: 'Invalid request data' });
+    }
+  });
+
+  app.delete('/api/workshops/:id', authenticateToken, requireRole(['enterprise']), async (req: AuthRequest, res) => {
+    try {
+      const enterprise = await storage.getEnterpriseByUserId(req.user!.id);
+      if (!enterprise) {
+        return res.status(400).json({ message: 'Enterprise profile not found' });
+      }
+
+      const workshop = await storage.getWorkshopById(parseInt(req.params.id));
+      if (!workshop || workshop.enterpriseId !== enterprise.id) {
+        return res.status(403).json({ message: 'Workshop not found or access denied' });
+      }
+
+      const deleted = await storage.deleteWorkshop(parseInt(req.params.id));
+      if (!deleted) {
+        return res.status(404).json({ message: 'Workshop not found' });
+      }
+
+      res.json({ message: 'Workshop deleted successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Server error' });
     }
@@ -392,6 +462,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/admin/registrations', authenticateToken, requireRole(['admin']), async (req: AuthRequest, res) => {
+    try {
+      const registrations = await db.select({
+        id: registrations.id,
+        userId: registrations.userId,
+        workshopId: registrations.workshopId,
+        reason: registrations.reason,
+        experience: registrations.experience,
+        expectations: registrations.expectations,
+        status: registrations.status,
+        paymentScreenshot: registrations.paymentScreenshot,
+        createdAt: registrations.createdAt,
+        userName: users.name,
+        userEmail: users.email,
+        workshopTitle: workshops.title,
+        workshopPrice: workshops.price,
+        workshopIsFree: workshops.isFree
+      })
+      .from(registrations)
+      .leftJoin(users, eq(registrations.userId, users.id))
+      .leftJoin(workshops, eq(registrations.workshopId, workshops.id))
+      .orderBy(desc(registrations.createdAt));
+
+      res.json(registrations);
+    } catch (error) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+
   app.patch('/api/admin/registrations/:id/status', authenticateToken, requireRole(['admin']), async (req: AuthRequest, res) => {
     try {
       const { status } = req.body;
@@ -405,7 +504,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // If approving, check workshop capacity
-      if (status === 'approved' || status === 'confirmed') {
+      if ((status === 'approved' || status === 'confirmed') && registration.status === 'pending') {
         const workshop = await storage.getWorkshopById(registration.workshopId);
         if (workshop && workshop.registeredSeats >= workshop.seats) {
           return res.status(400).json({ message: 'Workshop is full' });
