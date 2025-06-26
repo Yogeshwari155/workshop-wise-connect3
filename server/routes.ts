@@ -12,6 +12,9 @@ import {
   insertWorkshopSchema,
   insertRegistrationSchema
 } from "@shared/schema";
+import { eq, desc } from "drizzle-orm";
+import { db } from "./db";
+import { users, workshops, registrations } from "./db";
 
 const upload = multer({ dest: 'uploads/' });
 

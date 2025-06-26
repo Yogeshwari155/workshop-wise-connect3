@@ -86,22 +86,32 @@ export const registrationApi = {
     return response.json();
   },
 
-  create: async (data: { workshopId: number; reason?: string; paymentScreenshot?: File }): Promise<Registration> => {
+  create: async (data: { workshopId: number; reason?: string; paymentScreenshot?: File | null }): Promise<Registration> => {
     const token = localStorage.getItem('authToken');
     
-    const formData = new FormData();
-    formData.append('workshopId', data.workshopId.toString());
-    if (data.reason) formData.append('reason', data.reason);
-    if (data.paymentScreenshot) formData.append('paymentScreenshot', data.paymentScreenshot);
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+
+    const requestBody = {
+      workshopId: data.workshopId,
+      reason: data.reason || '',
+      paymentScreenshot: data.paymentScreenshot ? data.paymentScreenshot.name : null
+    };
 
     const response = await fetch(`${API_BASE}/registrations`, {
       method: 'POST',
       headers: {
+        'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
       },
-      body: formData,
+      body: JSON.stringify(requestBody),
     });
-    if (!response.ok) throw new Error('Failed to create registration');
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to create registration');
+    }
     return response.json();
   }
 };

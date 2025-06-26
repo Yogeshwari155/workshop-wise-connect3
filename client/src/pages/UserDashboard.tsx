@@ -48,7 +48,7 @@ const UserDashboard = () => {
 
   // Enterprise users should be redirected to enterprise dashboard
   if (user?.role === 'enterprise') {
-    window.location.href = '/enterprise-dashboard';
+    window.location.href = '/enterprise';
     return null;
   }
 
