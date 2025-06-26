@@ -16,7 +16,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { CalendarIcon, Plus, Users, Eye, Clock, MapPin, IndianRupee } from 'lucide-react';
+import { CalendarIcon, Plus, Users, Eye, Clock, MapPin, IndianRupee, RefreshCw } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { enterpriseApi, apiRequest } from '../utils/api';
 import { useToast } from '../hooks/use-toast';
@@ -62,9 +62,11 @@ const EnterpriseDashboard = () => {
     },
   });
 
-  const { data: workshops = [], isLoading } = useQuery({
+  const { data: workshops = [], isLoading, refetch } = useQuery({
     queryKey: ['enterprise-workshops'],
     queryFn: enterpriseApi.getWorkshops,
+    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchOnWindowFocus: true, // Refresh when window gets focus
   });
 
   const { data: registrations = [] } = useQuery({
@@ -140,13 +142,23 @@ const EnterpriseDashboard = () => {
             <p className="text-gray-600 mt-2">Welcome back, {user?.name}</p>
           </div>
           
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] hover:from-purple-600 hover:to-purple-700 text-white">
-                <Plus className="h-4 w-4 mr-2" />
-                Create Workshop
-              </Button>
-            </DialogTrigger>
+          <div className="flex gap-3">
+            <Button 
+              onClick={() => refetch()} 
+              variant="outline"
+              className="border-[#8B5CF6] text-[#8B5CF6] hover:bg-[#8B5CF6] hover:text-white"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
+            
+            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] hover:from-purple-600 hover:to-purple-700 text-white">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Workshop
+                </Button>
+              </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Create New Workshop</DialogTitle>
@@ -411,6 +423,7 @@ const EnterpriseDashboard = () => {
               </Form>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         {/* Workshop Stats */}
