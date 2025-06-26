@@ -48,13 +48,19 @@ const Register = () => {
 
     setIsLoading(true);
     try {
-      const success = await register({ ...userForm, role: 'user' });
-      if (success) {
+      const result = await register({ ...userForm, role: 'user' });
+      if (result.success) {
         toast({
           title: "Welcome to WorkshopWise! 🎉",
           description: "Your account has been created successfully.",
         });
         navigate('/dashboard');
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Registration failed",
+          description: result.error || "Please try again later.",
+        });
       }
     } catch (error) {
       toast({
@@ -80,13 +86,19 @@ const Register = () => {
 
     setIsLoading(true);
     try {
-      const success = await register({ ...enterpriseForm, role: 'enterprise' });
-      if (success) {
+      const result = await register({ ...enterpriseForm, role: 'enterprise' });
+      if (result.success) {
         toast({
           title: "Welcome to WorkshopWise! 🎉",
           description: "Your enterprise account has been created successfully.",
         });
         navigate('/dashboard');
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Registration failed",
+          description: result.error || "Please try again later.",
+        });
       }
     } catch (error) {
       toast({
