@@ -1,0 +1,65 @@
+I uploaded a UI design from Lovable for a workshop booking website. But several functions and visuals are broken or missing. Please fix the following issues and make the UI fully functional using modern HTML, Tailwind CSS, and optionally integrate with Next.js.
+
+📌 Fix the following issues:
+
+🔧 1. **Workshop Listing Page**:
+- Currently not showing any workshops.
+- Fix the layout and ensure workshops fetched from backend (or dummy list) are displayed clearly with title, date, price, and mode (online/offline).
+- Add fallback message if no workshops are available.
+- Style cards with hover and shadow effects.
+
+🖼️ 2. **About Page – Images Missing**:
+- Most of the images are not loading or are broken.
+- Use placeholder or default images where missing.
+- Ensure background images load properly in all viewports.
+- Maintain the original UI design fidelity from the Lovable export.
+
+📞 3. **Contact Page – Fix Images & Map**:
+- Many icons or background images are not visible.
+- Restore or replace them with placeholder images (for phone, email, etc.).
+- Insert a **default map image** in the “Location” section.
+- Ensure the card layout does not overflow or overlap.
+
+🔐 4. **Sign-In Page**:
+- Button text is invisible or unreadable.
+- Make all buttons and text fully visible, readable, and accessible.
+- Ensure focus, hover, and active states work for all inputs and buttons.
+
+🧑‍💼 5. **Admin Dashboard**:
+- Dashboard is missing or not visible.
+- Create a proper admin dashboard with navigation and:
+  - Total Users
+  - Workshops pending approval
+  - Button to access User, Enterprise, and Workshop Management
+- Use modern card layout with shadow and light background.
+
+🚀 6. **Get Started Page – Not Functioning**:
+- The "Get Started" button doesn’t create an account.
+- Add working logic or route to registration page.
+- Show success/error messages properly when submitting.
+- Input fields must be validated and required.
+
+🧾 7. **Account Creation/Register Page**:
+- Form does not submit or create accounts.
+- Add working logic or placeholder API call.
+- Add field validation, success messages, and redirect to dashboard on success.
+
+🎟️ 8. **Workshop Registration & Listing**:
+- Workshops are not showing on the homepage or dashboard.
+- Make sure added workshops show up dynamically.
+- Provide view details and register button with state.
+- Style each workshop card responsively.
+
+🎨 UI & UX Fixes:
+- Make all images and buttons visible (no transparent text or missing images).
+- Use consistent color scheme (light/dark theme support optional).
+- Use responsive layouts with padding/margin between components.
+- Ensure mobile responsiveness.
+
+🧩 Optional Enhancements:
+- Add navigation highlighting to show current page.
+- Add loading spinners where data is being fetched.
+- Add filter/sort options to the workshop list.
+
+🎯 Final Goal:
+Make the entire website fully working visually and functionally, while preserving the style and design exported from Lovable. Use modern Tailwind CSS styling. Buttons and images should **not be invisible**, all pages should **render without visual bugs**, and major actions like “Register”, “Get Started”, “Workshop Listing” should be **fully functional** or mocked properly.
