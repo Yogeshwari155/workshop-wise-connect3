@@ -1,0 +1,79 @@
+Here’s a **precise and optimized prompt** you can give to **Replit AI** or any AI backend tool to fix and enhance your **Workshop Booking Website backend**, focusing on registration flow, dashboard updates, login behavior, and full CRUD functionality for all roles:
+
+---
+
+**Prompt for Replit AI:**
+
+Fix and enhance the backend of the Workshop Booking Website with the following features and behaviors:
+
+---
+
+### 🛠️ 🔒 **Fix Registration & Authentication Flow:**
+
+* After **sign-up**, users must be **redirected to login**, not granted instant access.
+* Add proper **JWT-based session handling** so that access is only granted **after login**.
+
+---
+
+### 🧾 **Workshop Registration & Dashboard Sync:**
+
+* When a user registers for a workshop:
+
+  * A **registration entry** must be created with:
+
+    * user\_id
+    * workshop\_id
+    * status: `"pending"` (manual) or `"confirmed"` (automated)
+* This registered workshop must be **added to the user’s “My Workshops”** dashboard with:
+
+  * Workshop title, date, status (pending/confirmed), and mode.
+* Automatically update the **dashboard UI/data** without needing a page reload (enable polling or sockets if possible).
+
+---
+
+### 🔄 **Make All CRUD Functional:**
+
+#### 👤 **User:**
+
+* ✅ Create: Signup
+* 📝 Read: View available workshops & registered ones
+* ✏️ Update: Profile (edit name, password), update screenshot
+* ❌ Delete: Delete account
+
+#### 🏢 **Enterprise:**
+
+* ✅ Create: New workshop
+* 📝 Read: Their own workshops and registrations
+* ✏️ Update: Edit their workshops
+* ❌ Delete: Delete their workshops
+
+#### 🛡️ **Admin:**
+
+* ✅ Create: Default admin account
+* 📝 Read:
+
+  * All users
+  * All enterprises
+  * All workshops
+  * All registrations
+* ✏️ Update:
+
+  * Approve/reject workshops
+  * Approve/reject user registrations
+  * Edit user or enterprise data
+* ❌ Delete:
+
+  * Remove users, enterprises, or workshops
+
+---
+
+### 💡 Additional Backend Fixes:
+
+* Include middleware to restrict access based on user role.
+* Add timestamps for registrations and updates.
+* Support status transitions: from “pending” → “confirmed” → “completed” (optional).
+* Improve response messages to reflect actions taken (e.g., "Workshop approved", "Registration rejected").
+
+---
+
+Let me know if you'd like this deployed with a live API testing interface (like Swagger) or connected to a frontend.
