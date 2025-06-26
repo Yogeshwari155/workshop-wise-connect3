@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navigation from '../components/Navigation';
@@ -47,12 +46,12 @@ const WorkshopDetail = () => {
     • Performance Optimization Techniques
     • Testing React Applications
     • Deployment Strategies
-    
+
     Prerequisites:
     • Basic knowledge of React and JavaScript
     • Familiarity with ES6+ features
     • Understanding of HTML/CSS
-    
+
     Materials Provided:
     • Access to recorded sessions
     • Code repository with examples
@@ -68,7 +67,7 @@ const WorkshopDetail = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Navigation />
-      
+
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Workshop Header */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
@@ -182,14 +181,14 @@ const WorkshopDetail = () => {
 
                     {isAuthenticated ? (
                       <Link to={`/workshop/${workshop.id}/register`} className="block">
-                        <Button className="w-full bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white py-3 text-lg font-semibold">
+                        <Button className="w-full bg-gradient-to-r from-[#7C3AED] to-[#7C3AED] hover:from-[#6D28D9] hover:to-[#6D28D9] text-white py-3 text-lg font-semibold">
                           Register Now
                         </Button>
                       </Link>
                     ) : (
                       <div className="space-y-3">
                         <Link to="/login" className="block">
-                          <Button className="w-full bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white py-3 text-lg font-semibold">
+                          <Button className="w-full bg-gradient-to-r from-[#7C3AED] to-[#7C3AED] hover:from-[#6D28D9] hover:to-[#6D28D9] text-white py-3 text-lg font-semibold">
                             Login to Register
                           </Button>
                         </Link>
@@ -276,7 +275,7 @@ const WorkshopDetail = () => {
                       <p className="text-gray-600 text-sm">{workshop.instructor.designation}</p>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center space-x-2 text-gray-600">
                       <Building className="h-4 w-4" />

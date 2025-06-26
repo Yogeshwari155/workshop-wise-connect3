@@ -117,7 +117,7 @@ const Contact = () => {
             {contactInfo.map((info, index) => (
               <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow text-center">
                 <CardContent className="p-6 space-y-4">
-                  <div className="bg-gradient-to-r from-primary-500 to-accent-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto">
+                  <div className="bg-gradient-to-r from-[#7C3AED] to-[#7C3AED] w-12 h-12 rounded-full flex items-center justify-center mx-auto">
                     <info.icon className="h-6 w-6 text-white" />
                   </div>
                   <h3 className="text-lg font-display font-semibold text-gray-900">
@@ -204,7 +204,7 @@ const Contact = () => {
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white py-3 text-lg font-semibold"
+                    className="w-full bg-gradient-to-r from-[#7C3AED] to-[#7C3AED] hover:from-[#6D28D9] hover:to-[#6D28D9] text-white py-3 text-lg font-semibold"
                   >
                     {isSubmitting ? (
                       "Sending..."
@@ -224,10 +224,10 @@ const Contact = () => {
               {/* Embedded Map */}
               <Card className="border-0 shadow-xl">
                 <CardContent className="p-0">
-                  <div className="h-80 bg-gradient-to-br from-primary-100 to-accent-100 rounded-lg flex items-center justify-center relative overflow-hidden">
+                  <div className="h-80 bg-gradient-to-br from-purple-100 to-purple-100 rounded-lg flex items-center justify-center relative overflow-hidden">
                     <div className="absolute inset-0 bg-gray-200 opacity-50"></div>
                     <div className="relative z-10 text-center space-y-3">
-                      <MapPin className="h-16 w-16 text-primary-600 mx-auto" />
+                      <MapPin className="h-16 w-16 text-[#7C3AED] mx-auto" />
                       <div>
                         <p className="text-xl font-semibold text-gray-900 mb-2">Visit Our Office</p>
                         <p className="text-gray-700 font-medium">Koramangala, Bangalore</p>
@@ -249,8 +249,8 @@ const Contact = () => {
                 <CardContent className="space-y-4">
                   <div className="space-y-3">
                     <div className="flex items-center space-x-3">
-                      <div className="bg-green-100 p-2 rounded-full">
-                        <Phone className="h-4 w-4 text-green-600" />
+                      <div className="bg-purple-100 p-2 rounded-full">
+                        <Phone className="h-4 w-4 text-[#7C3AED]" />
                       </div>
                       <div>
                         <p className="font-medium text-gray-900">Call our support team</p>
@@ -259,8 +259,8 @@ const Contact = () => {
                     </div>
                     
                     <div className="flex items-center space-x-3">
-                      <div className="bg-blue-100 p-2 rounded-full">
-                        <Mail className="h-4 w-4 text-blue-600" />
+                      <div className="bg-purple-100 p-2 rounded-full">
+                        <Mail className="h-4 w-4 text-[#7C3AED]" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="font-medium text-gray-900">Email us directly</p>

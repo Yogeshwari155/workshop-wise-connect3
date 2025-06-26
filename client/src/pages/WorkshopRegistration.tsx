@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navigation from '../components/Navigation';
@@ -88,7 +87,7 @@ const WorkshopRegistration = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Navigation />
-      
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center space-y-4 mb-8">
           <h1 className="text-3xl font-display font-bold text-gray-900">
@@ -179,7 +178,7 @@ const WorkshopRegistration = () => {
                             <p><strong>Reference:</strong> REACT-ADV-{id}</p>
                           </div>
                         </div>
-                        
+
                         <div className="space-y-2">
                           <Label htmlFor="payment-proof">Upload Payment Screenshot *</Label>
                           <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
@@ -251,7 +250,7 @@ const WorkshopRegistration = () => {
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white py-3 text-lg font-semibold"
+                    className="w-full bg-gradient-to-r from-[#7C3AED] to-[#7C3AED] hover:from-[#6D28D9] hover:to-[#6D28D9] text-white py-3 text-lg font-semibold"
                   >
                     {isSubmitting 
                       ? "Processing..." 

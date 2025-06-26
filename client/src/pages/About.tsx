@@ -66,12 +66,12 @@ const About = () => {
       <section className="py-20 lg:py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-8">
-            <Badge className="bg-gradient-to-r from-primary-500 to-accent-500 text-white border-0 px-6 py-3 text-lg">
+            <Badge className="bg-gradient-to-r from-[#7C3AED] to-[#7C3AED] text-white border-0 px-6 py-3 text-lg">
               About WorkshopWise
             </Badge>
             <h1 className="text-4xl md:text-6xl font-display font-bold text-gray-900 leading-tight">
               Empowering Careers Through{' '}
-              <span className="bg-gradient-to-r from-primary-500 to-accent-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#7C3AED] to-[#7C3AED] bg-clip-text text-transparent">
                 Expert Learning
               </span>
             </h1>
@@ -105,7 +105,7 @@ const About = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
               <div className="flex items-center space-x-3">
-                <Target className="h-8 w-8 text-primary-500" />
+                <Target className="h-8 w-8 text-[#7C3AED]" />
                 <h2 className="text-3xl font-display font-bold text-gray-900">Our Mission</h2>
               </div>
               <p className="text-lg text-gray-700 leading-relaxed">
@@ -125,7 +125,7 @@ const About = () => {
               />
               <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-xl shadow-lg">
                 <div className="flex items-center space-x-3">
-                  <Award className="h-8 w-8 text-accent-500" />
+                  <Award className="h-8 w-8 text-[#7C3AED]" />
                   <div>
                     <div className="font-bold text-gray-900">95%</div>
                     <div className="text-sm text-gray-600">Success Rate</div>
@@ -153,7 +153,7 @@ const About = () => {
             {values.map((value, index) => (
               <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow text-center">
                 <CardContent className="p-8 space-y-4">
-                  <div className="bg-gradient-to-r from-primary-500 to-accent-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
+                  <div className="bg-gradient-to-r from-[#7C3AED] to-[#7C3AED] w-16 h-16 rounded-full flex items-center justify-center mx-auto">
                     <value.icon className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-xl font-display font-semibold text-gray-900">
@@ -194,7 +194,7 @@ const About = () => {
                     <h3 className="text-xl font-display font-semibold text-gray-900">
                       {member.name}
                     </h3>
-                    <p className="text-primary-600 font-medium">{member.role}</p>
+                    <p className="text-[#7C3AED] font-medium">{member.role}</p>
                   </div>
                   <p className="text-gray-600 leading-relaxed">
                     {member.bio}

@@ -22,7 +22,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/auth/login', async (req, res) => {
     try {
       const { email, password } = loginSchema.parse(req.body);
-      
+
       const user = await storage.getUserByEmail(email);
       if (!user) {
         return res.status(401).json({ message: 'Invalid credentials' });
@@ -34,7 +34,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const token = generateToken(user.id, user.email, user.role);
-      
+
       res.json({
         token,
         user: {
@@ -49,17 +49,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Register endpoint for users
   app.post('/api/auth/register/user', async (req, res) => {
     try {
       const userData = registerUserSchema.parse(req.body);
-      
+       const { name, email, password, confirmPassword } = req.body;
+
+      if (!name || !email || !password) {
+        return res.status(400).json({ message: 'All fields are required' });
+      }
+
+      if (password !== confirmPassword) {
+        return res.status(400).json({ message: 'Passwords do not match' });
+      }
+
       const existingUser = await storage.getUserByEmail(userData.email);
       if (existingUser) {
         return res.status(400).json({ message: 'Email already registered' });
       }
 
       const hashedPassword = await hashPassword(userData.password);
-      
+
       const user = await storage.createUser({
         name: userData.name,
         email: userData.email,
@@ -68,7 +78,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const token = generateToken(user.id, user.email, user.role);
-      
+
       res.status(201).json({
         token,
         user: {
@@ -83,17 +93,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Register endpoint for enterprises
   app.post('/api/auth/register/enterprise', async (req, res) => {
     try {
-      const enterpriseData = registerEnterpriseSchema.parse(req.body);
-      
+       const enterpriseData = registerEnterpriseSchema.parse(req.body);
+      const { companyName, name, email, password, confirmPassword, domain, location, website } = req.body;
+
+      if (!companyName || !name || !email || !password || !domain || !location) {
+        return res.status(400).json({ message: 'All required fields must be provided' });
+      }
+
+      if (password !== confirmPassword) {
+        return res.status(400).json({ message: 'Passwords do not match' });
+      }
+
       const existingUser = await storage.getUserByEmail(enterpriseData.email);
       if (existingUser) {
         return res.status(400).json({ message: 'Email already registered' });
       }
 
       const hashedPassword = await hashPassword(enterpriseData.password);
-      
+
       const user = await storage.createUser({
         name: enterpriseData.name,
         email: enterpriseData.email,
@@ -111,7 +131,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const token = generateToken(user.id, user.email, user.role);
-      
+
       res.status(201).json({
         token,
         user: {
@@ -161,7 +181,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const workshopData = insertWorkshopSchema.parse(req.body);
-      
+
       // Generate meet link if online and automated
       let meetLink = null;
       if (workshopData.mode === 'online' && workshopData.registrationMode === 'automated') {
@@ -185,7 +205,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/registrations', authenticateToken, requireRole(['user']), async (req: AuthRequest, res) => {
     try {
       const registrationData = insertRegistrationSchema.parse(req.body);
-      
+
       // Check if workshop exists
       const workshop = await storage.getWorkshopById(registrationData.workshopId);
       if (!workshop) {
@@ -201,7 +221,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         req.user!.id,
         registrationData.workshopId
       );
-      
+
       if (existingRegistration) {
         return res.status(400).json({ message: 'Already registered for this workshop' });
       }
@@ -236,7 +256,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/registrations/my', authenticateToken, async (req: AuthRequest, res) => {
     try {
       const registrations = await storage.getRegistrationsByUserId(req.user!.id);
-      
+
       // Get workshop details for each registration
       const registrationsWithWorkshops = await Promise.all(
         registrations.map(async (registration) => {
@@ -279,7 +299,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const registrations = await storage.getRegistrationsByWorkshopId(workshop.id);
-      
+
       // Get user details for each registration
       const registrationsWithUsers = await Promise.all(
         registrations.map(async (registration) => {

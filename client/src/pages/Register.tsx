@@ -108,14 +108,14 @@ const Register = () => {
         <div className="max-w-2xl w-full space-y-8">
           <div className="text-center">
             <div className="flex items-center justify-center space-x-2 mb-6">
-              <div className="bg-gradient-to-r from-primary-500 to-accent-500 p-3 rounded-lg">
+              <div className="bg-gradient-to-r from-[#7C3AED] to-[#7C3AED] p-3 rounded-lg">
                 <Calendar className="h-8 w-8 text-white" />
               </div>
               <span className="font-display font-bold text-2xl text-gray-900">
                 WorkshopWise
               </span>
             </div>
-            <h2 className="text-3xl font-display font-bold text-gray-900">
+            <h2 className="text-3xl font-display font-bold bg-gradient-to-r from-[#7C3AED] to-[#7C3AED] bg-clip-text text-transparent">
               Join WorkshopWise
             </h2>
             <p className="mt-2 text-gray-600">
@@ -198,7 +198,7 @@ const Register = () => {
                     <Button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white py-3 rounded-lg font-semibold"
+                      className="w-full bg-gradient-to-r from-[#7C3AED] to-[#7C3AED] hover:from-[#6D28D9] hover:to-[#6D28D9] text-white py-3 rounded-lg font-semibold"
                     >
                       {isLoading ? "Creating Account..." : "Create Account"}
                     </Button>
@@ -312,7 +312,7 @@ const Register = () => {
                     <Button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white py-3 rounded-lg font-semibold"
+                      className="w-full bg-gradient-to-r from-[#7C3AED] to-[#7C3AED] hover:from-[#6D28D9] hover:to-[#6D28D9] text-white py-3 rounded-lg font-semibold"
                     >
                       {isLoading ? "Creating Account..." : "Create Enterprise Account"}
                     </Button>

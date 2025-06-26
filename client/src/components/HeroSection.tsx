@@ -125,7 +125,7 @@ const HeroSection = () => {
                     <div className="text-lg font-bold text-[#8B5CF6]">₹2,999</div>
                   </div>
                   
-                  <Button className="w-full bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] hover:from-purple-600 hover:to-purple-700 text-white">
+                  <Button className="w-full bg-gradient-to-r from-[#7C3AED] to-[#7C3AED] hover:from-[#6D28D9] hover:to-[#6D28D9] text-white">
                     Register Now
                   </Button>
                 </div>
