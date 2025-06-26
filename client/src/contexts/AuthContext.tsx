@@ -65,6 +65,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         setUser(data.user);
+        
+        // Redirect based on user role
+        if (data.user.role === 'enterprise') {
+          window.location.href = '/enterprise-dashboard';
+        } else if (data.user.role === 'admin') {
+          window.location.href = '/admin';
+        } else {
+          window.location.href = '/dashboard';
+        }
+        
         return { success: true };
       } else {
         console.error('Login failed:', data);

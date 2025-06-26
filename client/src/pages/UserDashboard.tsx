@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import ProfileManagement from '../components/ProfileManagement';
-import EnterpriseDashboard from '../components/EnterpriseDashboard';
 import WorkshopRegistrationModal from '../components/WorkshopRegistrationModal';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
@@ -47,38 +46,10 @@ const UserDashboard = () => {
     }
   };
 
-  // If user is enterprise, show enterprise dashboard
+  // Enterprise users should be redirected to enterprise dashboard
   if (user?.role === 'enterprise') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <Navigation />
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Tabs defaultValue="dashboard" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 lg:w-auto lg:grid-cols-2">
-              <TabsTrigger value="dashboard" className="flex items-center space-x-2">
-                <Building className="h-4 w-4" />
-                <span>Enterprise Dashboard</span>
-              </TabsTrigger>
-              <TabsTrigger value="profile" className="flex items-center space-x-2">
-                <User className="h-4 w-4" />
-                <span>Profile</span>
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="dashboard">
-              <EnterpriseDashboard />
-            </TabsContent>
-
-            <TabsContent value="profile">
-              <ProfileManagement />
-            </TabsContent>
-          </Tabs>
-        </div>
-
-        <Footer />
-      </div>
-    );
+    window.location.href = '/enterprise-dashboard';
+    return null;
   }
 
   const handleWorkshopRegistration = async (workshopId: number, registrationData: any) => {

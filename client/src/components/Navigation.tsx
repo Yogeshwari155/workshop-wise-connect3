@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
@@ -153,7 +152,7 @@ const Navigation = () => {
               >
                 Contact
               </Link>
-              
+
               <div className="pt-4 pb-3 border-t border-gray-200">
                 {isAuthenticated ? (
                   <div className="space-y-2">
