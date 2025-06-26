@@ -156,6 +156,41 @@ export async function seedDatabase() {
     });
 
     console.log("✅ Sample registrations created");
+
+    // Create demo users if they don't exist
+  const demoUser = await storage.getUserByEmail('test@example.com');
+  if (!demoUser) {
+    await storage.createUser({
+      name: 'Demo User',
+      email: 'test@example.com',
+      password: await hashPassword('password'),
+      role: 'user'
+    });
+    console.log('Demo user created');
+  }
+
+  const demoUser2 = await storage.getUserByEmail('john@example.com');
+  if (!demoUser2) {
+    await storage.createUser({
+      name: 'John Doe',
+      email: 'john@example.com',
+      password: await hashPassword('password'),
+      role: 'user'
+    });
+    console.log('Demo user 2 created');
+  }
+
+  const demoUser3 = await storage.getUserByEmail('jane@example.com');
+  if (!demoUser3) {
+    await storage.createUser({
+      name: 'Jane Smith',
+      email: 'jane@example.com',
+      password: await hashPassword('password'),
+      role: 'user'
+    });
+    console.log('Demo user 3 created');
+  }
+
     console.log("\n🎉 Database seeded successfully!");
     console.log("\nDefault credentials:");
     console.log("Admin: admin@workshopwise.com / admin123");

@@ -10,8 +10,8 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (userData: any) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  register: (userData: any) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   loading: boolean;
 }
@@ -49,7 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -59,21 +59,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         body: JSON.stringify({ email, password }),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        const data = await response.json();
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         setUser(data.user);
-        return true;
+        return { success: true };
+      } else {
+        console.error('Login failed:', data);
+        return { success: false, error: data.message || 'Login failed' };
       }
-      return false;
     } catch (error) {
       console.error('Login error:', error);
-      return false;
+      return { success: false, error: 'Network error. Please try again.' };
     }
   };
 
-  const register = async (userData: any): Promise<boolean> => {
+  const register = async (userData: any): Promise<{ success: boolean; error?: string }> => {
     try {
       const endpoint = userData.role === 'enterprise'
         ? '/api/auth/register/enterprise'
@@ -91,16 +94,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (response.ok) {
         localStorage.setItem('authToken', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
         setUser(data.user);
-        return true;
+        return { success: true };
       } else {
-        const errorData = await response.json();
-        console.error('Registration failed:', errorData);
-        return false;
+        console.error('Registration failed:', data);
+        return { success: false, error: data.message || 'Registration failed' };
       }
     } catch (error) {
       console.error('Registration error:', error);
-      return false;
+      return { success: false, error: 'Network error. Please try again.' };
     }
   };
 

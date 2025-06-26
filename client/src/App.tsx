@@ -1,43 +1,42 @@
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { Toaster } from './components/ui/toaster';
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Index from "./pages/Index";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Workshops from "./pages/Workshops";
-import WorkshopDetail from "./pages/WorkshopDetail";
-import WorkshopRegistration from "./pages/WorkshopRegistration";
-import UserDashboard from "./pages/UserDashboard";
-import AdminDashboard from "./pages/AdminDashboard";
-import EnterpriseDashboard from "./pages/EnterpriseDashboard";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import NotFound from "./pages/NotFound";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
+// Pages
+import Index from './pages/Index';
+import About from './pages/About';
+import Contact from './pages/Contact';
+import Workshops from './pages/Workshops';
+import WorkshopDetail from './pages/WorkshopDetail';
+import WorkshopRegistration from './pages/WorkshopRegistration';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import UserDashboard from './pages/UserDashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import NotFound from './pages/NotFound';
+
+import './App.css';
 
 const queryClient = new QueryClient();
 
-// Protected Route Component
-const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles: string[] }) => {
+const PrivateRoute: React.FC<{ children: React.ReactNode; requireRole?: string }> = ({ 
+  children, 
+  requireRole 
+}) => {
   const { user, isAuthenticated, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl text-gray-600">Loading...</div>
-      </div>
-    );
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  if (!allowedRoles.includes(user?.role || '')) {
-    return <Navigate to="/" replace />;
+  if (requireRole && user?.role !== requireRole) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <>{children}</>;
@@ -46,56 +45,44 @@ const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode,
 const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<Index />} />
-    <Route path="/login" element={<Login />} />
-    <Route path="/register" element={<Register />} />
-    <Route path="/workshops" element={<Workshops />} />
-    <Route path="/workshop/:id" element={<WorkshopDetail />} />
-    <Route path="/workshop/:id/register" element={<WorkshopRegistration />} />
     <Route path="/about" element={<About />} />
     <Route path="/contact" element={<Contact />} />
-    
-    {/* Protected Routes */}
-    <Route 
-      path="/dashboard" 
-      element={
-        <ProtectedRoute allowedRoles={['user']}>
-          <UserDashboard />
-        </ProtectedRoute>
-      } 
-    />
-    <Route 
-      path="/admin" 
-      element={
-        <ProtectedRoute allowedRoles={['admin']}>
-          <AdminDashboard />
-        </ProtectedRoute>
-      } 
-    />
-    <Route 
-      path="/enterprise" 
-      element={
-        <ProtectedRoute allowedRoles={['enterprise']}>
-          <EnterpriseDashboard />
-        </ProtectedRoute>
-      } 
-    />
-    
+    <Route path="/workshops" element={<Workshops />} />
+    <Route path="/workshop/:id" element={<WorkshopDetail />} />
+    <Route path="/workshop/:id/register" element={
+      <PrivateRoute>
+        <WorkshopRegistration />
+      </PrivateRoute>
+    } />
+    <Route path="/login" element={<Login />} />
+    <Route path="/register" element={<Register />} />
+    <Route path="/dashboard" element={
+      <PrivateRoute>
+        <UserDashboard />
+      </PrivateRoute>
+    } />
+    <Route path="/admin" element={
+      <PrivateRoute requireRole="admin">
+        <AdminDashboard />
+      </PrivateRoute>
+    } />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
+        <Router>
+          <div className="min-h-screen bg-gray-50">
+            <AppRoutes />
+            <Toaster />
+          </div>
+        </Router>
       </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+    </QueryClientProvider>
+  );
+}
 
 export default App;

@@ -25,6 +25,29 @@ const UserDashboard = () => {
   const { data: availableWorkshops = [], isLoading: workshopsLoading } = useWorkshops();
   const registerMutation = useRegisterForWorkshop();
 
+  const handleQuickRegister = async (workshopId: number) => {
+    try {
+      await registerMutation.mutateAsync({
+        workshopId,
+        reason: 'Quick registration from dashboard',
+        paymentScreenshot: null
+      });
+      
+      toast({
+        title: "Registration Successful! 🎉",
+        description: "You have been registered for the workshop.",
+      });
+      
+      refetchRegistrations();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Registration Failed",
+        description: "Unable to register for workshop. Please try again.",
+      });
+    }
+  };
+
   // If user is enterprise, show enterprise dashboard
   if (user?.role === 'enterprise') {
     return (

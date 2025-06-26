@@ -25,8 +25,8 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const success = await login(email, password);
-      if (success) {
+      const result = await login(email, password);
+      if (result.success) {
         toast({
           title: "Welcome back! 🎉",
           description: "You've successfully logged in to WorkshopWise.",
@@ -36,7 +36,7 @@ const Login = () => {
         toast({
           variant: "destructive",
           title: "Login failed",
-          description: "Please check your credentials and try again.",
+          description: result.error || "Please check your credentials and try again.",
         });
       }
     } catch (error) {
@@ -164,6 +164,8 @@ const Login = () => {
                   <div className="space-y-2 text-xs">
                     <p className="text-gray-500">Admin: admin@workshopwise.com / admin123</p>
                     <p className="text-gray-500">User: test@example.com / password</p>
+                    <p className="text-gray-500">User: john@example.com / password</p>
+                    <p className="text-gray-500">User: jane@example.com / password</p>
                   </div>
                 </div>
               </div>
