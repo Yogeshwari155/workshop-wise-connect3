@@ -52,6 +52,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register endpoint for users
   app.post('/api/auth/register/user', async (req, res) => {
     try {
+      console.log('Registration request body:', req.body);
+
       const { name, email, password, confirmPassword } = req.body;
 
       if (!name || !email || !password || !confirmPassword) {
@@ -64,6 +66,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
+        console.log('User already exists:', email);
         return res.status(400).json({ message: 'Email already registered' });
       }
 
@@ -78,6 +81,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const token = generateToken(user.id, user.email, user.role);
 
+      console.log('User created successfully:', user.email);
       res.status(201).json({
         token,
         user: {
@@ -88,7 +92,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
     } catch (error) {
-      console.error('User registration error:', error);
+      console.error('Registration error:', error);
+      if (error instanceof Error) {
+        console.error('Error details:', error.message);
+      }
       res.status(400).json({ message: 'Registration failed. Please try again.' });
     }
   });
@@ -96,6 +103,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register endpoint for enterprises
   app.post('/api/auth/register/enterprise', async (req, res) => {
     try {
+      console.log('Enterprise registration request:', req.body);
+
       const { companyName, contactPerson, email, password, confirmPassword, domain, location, website } = req.body;
 
       if (!companyName || !contactPerson || !email || !password || !confirmPassword) {
@@ -108,6 +117,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
+        console.log('Enterprise user already exists:', email);
         return res.status(400).json({ message: 'Email already registered' });
       }
 
@@ -131,6 +141,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const token = generateToken(user.id, user.email, user.role);
 
+      console.log('Enterprise user created successfully:', user.email);
       res.status(201).json({
         token,
         user: {
@@ -143,6 +154,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error('Enterprise registration error:', error);
+      if (error instanceof Error) {
+        console.error('Error details:', error.message);
+      }
       res.status(400).json({ message: 'Registration failed. Please try again.' });
     }
   });
