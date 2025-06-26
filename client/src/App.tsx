@@ -42,41 +42,37 @@ const PrivateRoute: React.FC<{ children: React.ReactNode; requireRole?: string }
   return <>{children}</>;
 };
 
-const AppRoutes = () => (
-  <Routes>
-    <Route path="/" element={<Index />} />
-    <Route path="/about" element={<About />} />
-    <Route path="/contact" element={<Contact />} />
-    <Route path="/workshops" element={<Workshops />} />
-    <Route path="/workshop/:id" element={<WorkshopDetail />} />
-    <Route path="/workshop/:id/register" element={
-      <PrivateRoute>
-        <WorkshopRegistration />
-      </PrivateRoute>
-    } />
-    <Route path="/login" element={<Login />} />
-    <Route path="/register" element={<Register />} />
-    <Route path="/dashboard" element={
-      <PrivateRoute>
-        <UserDashboard />
-      </PrivateRoute>
-    } />
-    <Route path="/admin" element={
-      <PrivateRoute requireRole="admin">
-        <AdminDashboard />
-      </PrivateRoute>
-    } />
-    <Route path="*" element={<NotFound />} />
-  </Routes>
-);
-
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Router>
           <div className="min-h-screen bg-gray-50">
-            <AppRoutes />
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/workshops" element={<Workshops />} />
+              <Route path="/workshop/:id" element={<WorkshopDetail />} />
+              <Route path="/workshop/:id/register" element={
+                <PrivateRoute>
+                  <WorkshopRegistration />
+                </PrivateRoute>
+              } />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/dashboard" element={
+                <PrivateRoute>
+                  <UserDashboard />
+                </PrivateRoute>
+              } />
+              <Route path="/admin" element={
+                <PrivateRoute requireRole="admin">
+                  <AdminDashboard />
+                </PrivateRoute>
+              } />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
             <Toaster />
           </div>
         </Router>

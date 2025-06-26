@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navigation from '../components/Navigation';
@@ -7,7 +6,7 @@ import ProfileManagement from '../components/ProfileManagement';
 import EnterpriseDashboard from '../components/EnterpriseDashboard';
 import WorkshopRegistrationModal from '../components/WorkshopRegistrationModal';
 import { Button } from '../components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { useAuth } from '../contexts/AuthContext';
@@ -20,7 +19,7 @@ const UserDashboard = () => {
   const { toast } = useToast();
   const [selectedWorkshop, setSelectedWorkshop] = useState(null);
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
-  
+
   const { data: myRegistrations = [], isLoading: registrationsLoading, refetch: refetchRegistrations } = useMyRegistrations();
   const { data: availableWorkshops = [], isLoading: workshopsLoading } = useWorkshops();
   const registerMutation = useRegisterForWorkshop();
@@ -32,12 +31,12 @@ const UserDashboard = () => {
         reason: 'Quick registration from dashboard',
         paymentScreenshot: null
       });
-      
+
       toast({
         title: "Registration Successful! 🎉",
         description: "You have been registered for the workshop.",
       });
-      
+
       refetchRegistrations();
     } catch (error) {
       toast({
@@ -53,7 +52,7 @@ const UserDashboard = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
         <Navigation />
-        
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Tabs defaultValue="dashboard" className="space-y-6">
             <TabsList className="grid w-full grid-cols-2 lg:w-auto lg:grid-cols-2">
@@ -88,12 +87,12 @@ const UserDashboard = () => {
         workshopId,
         ...registrationData
       });
-      
+
       toast({
         title: "Registration Successful",
         description: "You have been registered for the workshop.",
       });
-      
+
       setShowRegistrationModal(false);
       refetchRegistrations();
     } catch (error) {
@@ -153,7 +152,7 @@ const UserDashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Navigation />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-display font-bold text-gray-900 mb-2">
@@ -336,7 +335,7 @@ const UserDashboard = () => {
                 {availableWorkshops.slice(0, 4).map((workshop) => {
                   const isRegistered = myRegistrations.some(r => r.workshopId === workshop.id);
                   const availableSeats = workshop.seats - workshop.registeredSeats;
-                  
+
                   return (
                     <Card key={workshop.id} className="border-0 shadow-lg hover:shadow-xl transition-shadow">
                       <CardContent className="p-0">

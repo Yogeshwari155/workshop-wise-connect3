@@ -51,10 +51,10 @@ const Register = () => {
       const result = await register({ ...userForm, role: 'user' });
       if (result.success) {
         toast({
-          title: "Welcome to WorkshopWise! 🎉",
-          description: "Your account has been created successfully.",
+          title: "Account Created Successfully! 🎉",
+          description: "Please login with your credentials to continue.",
         });
-        navigate('/dashboard');
+        navigate('/login');
       } else {
         toast({
           variant: "destructive",
@@ -89,10 +89,10 @@ const Register = () => {
       const result = await register({ ...enterpriseForm, role: 'enterprise' });
       if (result.success) {
         toast({
-          title: "Welcome to WorkshopWise! 🎉",
-          description: "Your enterprise account has been created successfully.",
+          title: "Enterprise Account Created! 🎉",
+          description: "Please login with your credentials. Your enterprise will be reviewed for approval.",
         });
-        navigate('/dashboard');
+        navigate('/login');
       } else {
         toast({
           variant: "destructive",
