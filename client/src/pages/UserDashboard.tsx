@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
@@ -12,6 +12,7 @@ import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/use-toast';
+import { useMyRegistrations, useWorkshops, useRegisterForWorkshop } from '../hooks/useWorkshops';
 import { Calendar, Clock, MapPin, User, Star, Building, ExternalLink, Users, Plus } from 'lucide-react';
 
 const UserDashboard = () => {
@@ -19,37 +20,10 @@ const UserDashboard = () => {
   const { toast } = useToast();
   const [selectedWorkshop, setSelectedWorkshop] = useState(null);
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
-
-  // Mock available workshops for registration
-  const availableWorkshops = [
-    {
-      id: 4,
-      title: "Python for Beginners",
-      company: "CodeAcademy",
-      date: "25 Jan 2025",
-      time: "11:00 AM",
-      mode: "Online",
-      price: 0,
-      seats: 30,
-      registeredSeats: 15,
-      registrationMode: "automated",
-      image: "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=300&h=200&fit=crop"
-    },
-    {
-      id: 5,
-      title: "UI/UX Design Workshop",
-      company: "Design Studio",
-      date: "30 Jan 2025",
-      time: "2:00 PM",
-      mode: "Hybrid",
-      location: "Mumbai",
-      price: 1500,
-      seats: 20,
-      registeredSeats: 8,
-      registrationMode: "manual",
-      image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=300&h=200&fit=crop"
-    }
-  ];
+  
+  const { data: myRegistrations = [], isLoading: registrationsLoading, refetch: refetchRegistrations } = useMyRegistrations();
+  const { data: availableWorkshops = [], isLoading: workshopsLoading } = useWorkshops();
+  const registerMutation = useRegisterForWorkshop();
 
   // If user is enterprise, show enterprise dashboard
   if (user?.role === 'enterprise') {
@@ -85,47 +59,27 @@ const UserDashboard = () => {
     );
   }
 
-  // Enhanced registered workshops with meet links and status
-  const registeredWorkshops = [
-    {
-      id: 1,
-      title: "Advanced React Development",
-      company: "TechCorp Solutions",
-      date: "15 Jan 2025",
-      time: "10:00 AM",
-      mode: "Online",
-      status: "confirmed",
-      meetLink: "https://meet.google.com/abc-defg-hij",
-      image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=300&h=200&fit=crop"
-    },
-    {
-      id: 2,
-      title: "Digital Marketing Masterclass",
-      company: "Growth Academy",
-      date: "20 Jan 2025",
-      time: "2:00 PM",
-      mode: "Hybrid",
-      status: "pending",
-      image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=300&h=200&fit=crop"
-    },
-    {
-      id: 3,
-      title: "Data Science Fundamentals",
-      company: "DataMinds Inc",
-      date: "10 Jan 2025",
-      time: "9:00 AM",
-      mode: "Offline",
-      location: "Bangalore",
-      status: "completed",
-      rating: 5,
-      image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=300&h=200&fit=crop"
+  const handleWorkshopRegistration = async (workshopId: number, registrationData: any) => {
+    try {
+      await registerMutation.mutateAsync({
+        workshopId,
+        ...registrationData
+      });
+      
+      toast({
+        title: "Registration Successful",
+        description: "You have been registered for the workshop.",
+      });
+      
+      setShowRegistrationModal(false);
+      refetchRegistrations();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Registration Failed",
+        description: "Please try again later.",
+      });
     }
-  ];
-
-  const handleWorkshopRegistration = (workshopId: number, registrationData: any) => {
-    console.log('Registration data:', registrationData);
-    // In real app, this would call an API
-    setShowRegistrationModal(false);
   };
 
   const getStatusBadge = (status: string) => {
@@ -136,10 +90,42 @@ const UserDashboard = () => {
         return <Badge className="bg-yellow-500 text-white">Pending Approval</Badge>;
       case 'completed':
         return <Badge className="bg-blue-500 text-white">Completed</Badge>;
+      case 'approved':
+        return <Badge className="bg-green-500 text-white">Approved</Badge>;
+      case 'rejected':
+        return <Badge className="bg-red-500 text-white">Rejected</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
   };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
+
+  const formatTime = (dateString: string) => {
+    return new Date(dateString).toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  if (registrationsLoading || workshopsLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <Navigation />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center">Loading...</div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -176,8 +162,8 @@ const UserDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <Card className="border-0 shadow-lg">
                 <CardContent className="p-6 text-center">
-                  <div className="text-2xl font-bold text-primary-600 mb-2">
-                    {registeredWorkshops.length}
+                  <div className="text-2xl font-bold text-[#7C3AED] mb-2">
+                    {myRegistrations.length}
                   </div>
                   <div className="text-gray-600">Total Workshops</div>
                 </CardContent>
@@ -185,7 +171,7 @@ const UserDashboard = () => {
               <Card className="border-0 shadow-lg">
                 <CardContent className="p-6 text-center">
                   <div className="text-2xl font-bold text-green-600 mb-2">
-                    {registeredWorkshops.filter(w => w.status === 'confirmed').length}
+                    {myRegistrations.filter(r => r.status === 'confirmed' || r.status === 'approved').length}
                   </div>
                   <div className="text-gray-600">Confirmed</div>
                 </CardContent>
@@ -193,7 +179,7 @@ const UserDashboard = () => {
               <Card className="border-0 shadow-lg">
                 <CardContent className="p-6 text-center">
                   <div className="text-2xl font-bold text-yellow-600 mb-2">
-                    {registeredWorkshops.filter(w => w.status === 'pending').length}
+                    {myRegistrations.filter(r => r.status === 'pending').length}
                   </div>
                   <div className="text-gray-600">Pending</div>
                 </CardContent>
@@ -201,7 +187,7 @@ const UserDashboard = () => {
               <Card className="border-0 shadow-lg">
                 <CardContent className="p-6 text-center">
                   <div className="text-2xl font-bold text-blue-600 mb-2">
-                    {registeredWorkshops.filter(w => w.status === 'completed').length}
+                    {myRegistrations.filter(r => r.status === 'completed').length}
                   </div>
                   <div className="text-gray-600">Completed</div>
                 </CardContent>
@@ -214,7 +200,7 @@ const UserDashboard = () => {
                 Your Registered Workshops
               </h2>
 
-              {registeredWorkshops.length === 0 ? (
+              {myRegistrations.length === 0 ? (
                 <Card className="border-0 shadow-lg">
                   <CardContent className="p-12 text-center">
                     <Calendar className="h-16 w-16 text-gray-400 mx-auto mb-4" />
@@ -225,7 +211,7 @@ const UserDashboard = () => {
                       Start your learning journey by registering for your first workshop
                     </p>
                     <Link to="/workshops">
-                      <Button className="bg-gradient-to-r from-primary-500 to-accent-500">
+                      <Button className="bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED]">
                         Explore Workshops
                       </Button>
                     </Link>
@@ -233,62 +219,56 @@ const UserDashboard = () => {
                 </Card>
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {registeredWorkshops.map((workshop) => (
-                    <Card key={workshop.id} className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+                  {myRegistrations.map((registration) => (
+                    <Card key={registration.id} className="border-0 shadow-lg hover:shadow-xl transition-shadow">
                       <CardContent className="p-0">
                         <div className="flex">
                           <img 
-                            src={workshop.image} 
-                            alt={workshop.title}
+                            src={registration.workshop?.image || "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=300&h=200&fit=crop"} 
+                            alt={registration.workshop?.title}
                             className="w-24 h-24 object-cover rounded-l-lg"
                           />
                           <div className="flex-1 p-4 space-y-3">
                             <div className="flex justify-between items-start">
                               <div>
-                                <h3 className="font-semibold text-gray-900">{workshop.title}</h3>
-                                <p className="text-sm text-gray-600">{workshop.company}</p>
+                                <h3 className="font-semibold text-gray-900">{registration.workshop?.title}</h3>
+                                <p className="text-sm text-gray-600">{registration.workshop?.company}</p>
                               </div>
-                              {getStatusBadge(workshop.status)}
+                              {getStatusBadge(registration.status)}
                             </div>
 
                             <div className="flex items-center space-x-4 text-sm text-gray-600">
                               <div className="flex items-center space-x-1">
                                 <Calendar className="h-4 w-4" />
-                                <span>{workshop.date}</span>
+                                <span>{registration.workshop?.date ? formatDate(registration.workshop.date) : 'TBD'}</span>
                               </div>
                               <div className="flex items-center space-x-1">
                                 <Clock className="h-4 w-4" />
-                                <span>{workshop.time}</span>
+                                <span>{registration.workshop?.date ? formatTime(registration.workshop.date) : 'TBD'}</span>
                               </div>
                             </div>
 
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-2 text-sm">
-                                <Badge variant="secondary">{workshop.mode}</Badge>
-                                {workshop.location && (
+                                <Badge variant="secondary">{registration.workshop?.mode}</Badge>
+                                {registration.workshop?.location && (
                                   <div className="flex items-center space-x-1 text-gray-600">
                                     <MapPin className="h-3 w-3" />
-                                    <span>{workshop.location}</span>
+                                    <span>{registration.workshop.location}</span>
                                   </div>
                                 )}
                               </div>
-                              
-                              {workshop.status === 'completed' && workshop.rating && (
-                                <div className="flex items-center space-x-1">
-                                  {[...Array(workshop.rating)].map((_, i) => (
-                                    <Star key={i} className="h-4 w-4 text-yellow-500 fill-current" />
-                                  ))}
-                                </div>
-                              )}
                             </div>
 
                             {/* Google Meet Link for Online Confirmed Workshops */}
-                            {workshop.mode === 'Online' && workshop.status === 'confirmed' && workshop.meetLink && (
+                            {registration.workshop?.mode === 'online' && 
+                             (registration.status === 'confirmed' || registration.status === 'approved') && 
+                             registration.workshop?.meetLink && (
                               <div className="bg-green-50 p-3 rounded-lg">
                                 <div className="flex items-center justify-between">
                                   <span className="text-sm font-medium text-green-800">Meeting Link Ready</span>
                                   <a 
-                                    href={workshop.meetLink} 
+                                    href={registration.workshop.meetLink} 
                                     target="_blank" 
                                     rel="noopener noreferrer"
                                     className="flex items-center space-x-1 text-sm text-green-600 hover:text-green-800"
@@ -301,7 +281,7 @@ const UserDashboard = () => {
                             )}
 
                             {/* Pending Request Status */}
-                            {workshop.status === 'pending' && (
+                            {registration.status === 'pending' && (
                               <div className="bg-yellow-50 p-3 rounded-lg">
                                 <span className="text-sm font-medium text-yellow-800">
                                   Request Sent to Admin - Awaiting Approval
@@ -330,69 +310,79 @@ const UserDashboard = () => {
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {availableWorkshops.map((workshop) => (
-                  <Card key={workshop.id} className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-                    <CardContent className="p-0">
-                      <div className="flex">
-                        <img 
-                          src={workshop.image} 
-                          alt={workshop.title}
-                          className="w-24 h-24 object-cover rounded-l-lg"
-                        />
-                        <div className="flex-1 p-4 space-y-3">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h3 className="font-semibold text-gray-900">{workshop.title}</h3>
-                              <p className="text-sm text-gray-600">{workshop.company}</p>
-                            </div>
-                            <div className="flex space-x-2">
-                              <Badge variant={workshop.registrationMode === 'automated' ? 'default' : 'secondary'}>
-                                {workshop.registrationMode === 'automated' ? 'Instant' : 'Manual'}
-                              </Badge>
-                              {workshop.price === 0 && (
-                                <Badge className="bg-green-500 text-white">FREE</Badge>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="flex items-center space-x-4 text-sm text-gray-600">
-                            <div className="flex items-center space-x-1">
-                              <Calendar className="h-4 w-4" />
-                              <span>{workshop.date}</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <Clock className="h-4 w-4" />
-                              <span>{workshop.time}</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-4 text-sm">
-                              <Badge variant="secondary">{workshop.mode}</Badge>
-                              <div className="flex items-center space-x-1 text-gray-600">
-                                <Users className="h-3 w-3" />
-                                <span>{workshop.seats - workshop.registeredSeats} seats left</span>
+                {availableWorkshops.slice(0, 4).map((workshop) => {
+                  const isRegistered = myRegistrations.some(r => r.workshopId === workshop.id);
+                  const availableSeats = workshop.seats - workshop.registeredSeats;
+                  
+                  return (
+                    <Card key={workshop.id} className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+                      <CardContent className="p-0">
+                        <div className="flex">
+                          <img 
+                            src={workshop.image || "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=300&h=200&fit=crop"} 
+                            alt={workshop.title}
+                            className="w-24 h-24 object-cover rounded-l-lg"
+                          />
+                          <div className="flex-1 p-4 space-y-3">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <h3 className="font-semibold text-gray-900">{workshop.title}</h3>
+                                <p className="text-sm text-gray-600">{workshop.company}</p>
                               </div>
-                              {workshop.price > 0 && (
-                                <span className="font-medium text-green-600">₹{workshop.price}</span>
+                              <div className="flex space-x-2">
+                                <Badge variant={workshop.registrationMode === 'automated' ? 'default' : 'secondary'}>
+                                  {workshop.registrationMode === 'automated' ? 'Instant' : 'Manual'}
+                                </Badge>
+                                {workshop.price === 0 && (
+                                  <Badge className="bg-green-500 text-white">FREE</Badge>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center space-x-4 text-sm text-gray-600">
+                              <div className="flex items-center space-x-1">
+                                <Calendar className="h-4 w-4" />
+                                <span>{workshop.date ? formatDate(workshop.date) : 'TBD'}</span>
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <Clock className="h-4 w-4" />
+                                <span>{workshop.date ? formatTime(workshop.date) : 'TBD'}</span>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-4 text-sm">
+                                <Badge variant="secondary">{workshop.mode}</Badge>
+                                <div className="flex items-center space-x-1 text-gray-600">
+                                  <Users className="h-3 w-3" />
+                                  <span>{availableSeats} seats left</span>
+                                </div>
+                                {workshop.price > 0 && (
+                                  <span className="font-medium text-green-600">₹{workshop.price}</span>
+                                )}
+                              </div>
+                              {isRegistered ? (
+                                <Badge className="bg-[#7C3AED] text-white">Registered</Badge>
+                              ) : (
+                                <Button 
+                                  size="sm"
+                                  className="bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED]"
+                                  onClick={() => {
+                                    setSelectedWorkshop(workshop);
+                                    setShowRegistrationModal(true);
+                                  }}
+                                  disabled={availableSeats <= 0}
+                                >
+                                  {availableSeats <= 0 ? 'Full' : 'Register'}
+                                </Button>
                               )}
                             </div>
-                            <Button 
-                              size="sm"
-                              onClick={() => {
-                                setSelectedWorkshop(workshop);
-                                setShowRegistrationModal(true);
-                              }}
-                              disabled={workshop.seats <= workshop.registeredSeats}
-                            >
-                              Register
-                            </Button>
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             </div>
           </TabsContent>

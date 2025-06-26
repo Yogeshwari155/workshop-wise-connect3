@@ -1,73 +1,111 @@
-const API_BASE = '';
 
-export const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
-  const token = localStorage.getItem('authToken');
-  
-  const defaultHeaders: HeadersInit = {
-    'Content-Type': 'application/json',
-  };
+const API_BASE = '/api';
 
-  if (token) {
-    defaultHeaders.Authorization = `Bearer ${token}`;
-  }
+interface Workshop {
+  id: number;
+  title: string;
+  company: string;
+  date: string;
+  mode: string;
+  price: number;
+  seats: number;
+  registeredSeats: number;
+  registrationMode: string;
+  image?: string;
+  meetLink?: string;
+  location?: string;
+}
 
-  const config: RequestInit = {
-    ...options,
-    headers: {
-      ...defaultHeaders,
-      ...options.headers,
-    },
-  };
+interface Registration {
+  id: number;
+  workshopId: number;
+  userId: number;
+  status: string;
+  reason?: string;
+  createdAt: string;
+  workshop?: Workshop;
+}
 
-  const response = await fetch(`${API_BASE}${endpoint}`, config);
-  
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-  
-  return response.json();
-};
-
-// Workshop API calls
 export const workshopApi = {
-  getAll: () => apiRequest('/api/workshops'),
-  getById: (id: number) => apiRequest(`/api/workshops/${id}`),
-  create: (workshop: any) => apiRequest('/api/workshops', {
-    method: 'POST',
-    body: JSON.stringify(workshop),
-  }),
+  getAll: async (): Promise<Workshop[]> => {
+    const response = await fetch(`${API_BASE}/workshops`);
+    if (!response.ok) throw new Error('Failed to fetch workshops');
+    return response.json();
+  },
+
+  getById: async (id: number): Promise<Workshop> => {
+    const response = await fetch(`${API_BASE}/workshops/${id}`);
+    if (!response.ok) throw new Error('Failed to fetch workshop');
+    return response.json();
+  },
+
+  create: async (data: Partial<Workshop>): Promise<Workshop> => {
+    const token = localStorage.getItem('authToken');
+    const response = await fetch(`${API_BASE}/workshops`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Failed to create workshop');
+    return response.json();
+  }
 };
 
-// Registration API calls
 export const registrationApi = {
-  create: (registration: any) => apiRequest('/api/registrations', {
-    method: 'POST',
-    body: JSON.stringify(registration),
-  }),
-  getMy: () => apiRequest('/api/registrations/my'),
+  getMy: async (): Promise<Registration[]> => {
+    const token = localStorage.getItem('authToken');
+    const response = await fetch(`${API_BASE}/registrations/my`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) throw new Error('Failed to fetch registrations');
+    return response.json();
+  },
+
+  create: async (data: { workshopId: number; reason?: string; paymentScreenshot?: File }): Promise<Registration> => {
+    const token = localStorage.getItem('authToken');
+    
+    const formData = new FormData();
+    formData.append('workshopId', data.workshopId.toString());
+    if (data.reason) formData.append('reason', data.reason);
+    if (data.paymentScreenshot) formData.append('paymentScreenshot', data.paymentScreenshot);
+
+    const response = await fetch(`${API_BASE}/registrations`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    });
+    if (!response.ok) throw new Error('Failed to create registration');
+    return response.json();
+  }
 };
 
-// Enterprise API calls
 export const enterpriseApi = {
-  getWorkshops: () => apiRequest('/api/enterprise/workshops'),
-  getRegistrations: (workshopId: number) => apiRequest(`/api/enterprise/registrations/${workshopId}`),
-};
+  getWorkshops: async (): Promise<Workshop[]> => {
+    const token = localStorage.getItem('authToken');
+    const response = await fetch(`${API_BASE}/enterprise/workshops`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) throw new Error('Failed to fetch enterprise workshops');
+    return response.json();
+  },
 
-// Admin API calls
-export const adminApi = {
-  getUsers: () => apiRequest('/api/admin/users'),
-  getEnterprises: () => apiRequest('/api/admin/enterprises'),
-  getWorkshops: () => apiRequest('/api/admin/workshops'),
-  updateWorkshopStatus: (id: number, status: string) => apiRequest(`/api/admin/workshops/${id}/status`, {
-    method: 'PATCH',
-    body: JSON.stringify({ status }),
-  }),
-  updateEnterpriseStatus: (id: number, status: string) => apiRequest(`/api/admin/enterprises/${id}/status`, {
-    method: 'PATCH',
-    body: JSON.stringify({ status }),
-  }),
-  updateRegistrationStatus: (id: number, status: string) => apiRequest(`/api/admin/registrations/${id}/status`, {
-    method: 'PATCH',
-    body: JSON.stringify({ status }),
-  }),
+  getRegistrations: async (workshopId: number): Promise<Registration[]> => {
+    const token = localStorage.getItem('authToken');
+    const response = await fetch(`${API_BASE}/enterprise/registrations/${workshopId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) throw new Error('Failed to fetch registrations');
+    return response.json();
+  }
 };
