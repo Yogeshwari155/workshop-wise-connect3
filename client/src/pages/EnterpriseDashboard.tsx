@@ -24,7 +24,9 @@ import { useToast } from '../hooks/use-toast';
 const workshopSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().min(1, 'Description is required'),
-  date: z.date(),
+  date: z.date({
+    required_error: "Please select a date for the workshop.",
+  }),
   time: z.string().min(1, 'Time is required'),
   duration: z.string().min(1, 'Duration is required'),
   mode: z.enum(['online', 'offline', 'hybrid']),
@@ -50,6 +52,7 @@ const EnterpriseDashboard = () => {
     defaultValues: {
       title: '',
       description: '',
+      date: undefined,
       time: '',
       duration: '',
       mode: 'online',

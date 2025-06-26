@@ -6,51 +6,57 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Users, Building, BookOpen, TrendingUp, Eye, Check, X, Calendar, MapPin, IndianRupee } from 'lucide-react';
+import { Users, Building, BookOpen, TrendingUp, Eye, Check, X, Calendar, MapPin, IndianRupee, RefreshCw } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
 
 const AdminDashboard = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch all data
-  const { data: users = [] } = useQuery({
+  // Fetch all data with real-time refresh
+  const { data: users = [], refetch: refetchUsers } = useQuery({
     queryKey: ['/api/admin/users'],
     queryFn: async () => {
       const response = await fetch('/api/admin/users', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
         }
       });
       if (!response.ok) throw new Error('Failed to fetch users');
       return response.json();
-    }
+    },
+    refetchInterval: 30000,
+    refetchOnWindowFocus: true,
   });
 
-  const { data: enterprises = [] } = useQuery({
+  const { data: enterprises = [], refetch: refetchEnterprises } = useQuery({
     queryKey: ['/api/admin/enterprises'],
     queryFn: async () => {
       const response = await fetch('/api/admin/enterprises', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
         }
       });
       if (!response.ok) throw new Error('Failed to fetch enterprises');
       return response.json();
-    }
+    },
+    refetchInterval: 30000,
+    refetchOnWindowFocus: true,
   });
 
-  const { data: workshops = [] } = useQuery({
+  const { data: workshops = [], refetch: refetchWorkshops } = useQuery({
     queryKey: ['/api/admin/workshops'],
     queryFn: async () => {
       const response = await fetch('/api/admin/workshops', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
         }
       });
       if (!response.ok) throw new Error('Failed to fetch workshops');
       return response.json();
-    }
+    },
+    refetchInterval: 30000,
+    refetchOnWindowFocus: true,
   });
 
   const handleWorkshopAction = async (workshopId: number, action: 'approve' | 'reject') => {
@@ -59,7 +65,7 @@ const AdminDashboard = () => {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
         },
         body: JSON.stringify({ 
           status: action === 'approve' ? 'approved' : 'rejected' 
@@ -94,7 +100,7 @@ const AdminDashboard = () => {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
         },
         body: JSON.stringify({ 
           status: action === 'approve' ? 'approved' : 'rejected' 
@@ -131,13 +137,27 @@ const AdminDashboard = () => {
       {/* Header */}
       <section className="bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Admin Dashboard
-            </h1>
-            <p className="text-xl text-purple-100">
-              Manage users, enterprises, and workshops
-            </p>
+          <div className="flex justify-between items-center">
+            <div className="text-center flex-1">
+              <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                Admin Dashboard
+              </h1>
+              <p className="text-xl text-purple-100">
+                Manage users, enterprises, and workshops
+              </p>
+            </div>
+            <Button 
+              onClick={() => {
+                refetchUsers();
+                refetchEnterprises();
+                refetchWorkshops();
+              }}
+              variant="outline"
+              className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
           </div>
         </div>
       </section>
