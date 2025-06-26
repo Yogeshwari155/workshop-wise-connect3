@@ -77,7 +77,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const endpoint = userData.role === 'enterprise'
         ? '/api/auth/register/enterprise'
-        : '/api/auth/register/individual'; // Changed 'user' to 'individual'
+        : '/api/auth/register/user';
 
       const response = await fetch(endpoint, {
         method: 'POST',
