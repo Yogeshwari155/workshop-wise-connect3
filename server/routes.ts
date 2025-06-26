@@ -14,7 +14,7 @@ import {
 } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 import { db } from "./db";
-import { users, workshops, registrations } from "./db";
+import { users, workshops, registrations as registrationsTable } from "@shared/schema";
 
 const upload = multer({ dest: 'uploads/' });
 
@@ -256,7 +256,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Determine registration status
-      let status = 'pending';
+      let status: 'pending' | 'confirmed' | 'approved' | 'rejected' = 'pending';
       let shouldUpdateSeats = false;
 
       if (workshop.registrationMode === 'automated') {
@@ -283,7 +283,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const registration = await storage.createRegistration({
         ...registrationData,
         userId: req.user!.id,
-        status
+        status: status as "pending" | "approved" | "rejected" | "confirmed"
       });
 
       res.status(201).json({
@@ -467,28 +467,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/admin/registrations', authenticateToken, requireRole(['admin']), async (req: AuthRequest, res) => {
     try {
-      const registrations = await db.select({
-        id: registrations.id,
-        userId: registrations.userId,
-        workshopId: registrations.workshopId,
-        reason: registrations.reason,
-        experience: registrations.experience,
-        expectations: registrations.expectations,
-        status: registrations.status,
-        paymentScreenshot: registrations.paymentScreenshot,
-        createdAt: registrations.createdAt,
+      const allRegistrations = await db.select({
+        id: registrationsTable.id,
+        userId: registrationsTable.userId,
+        workshopId: registrationsTable.workshopId,
+        reason: registrationsTable.reason,
+        experience: registrationsTable.experience,
+        expectations: registrationsTable.expectations,
+        status: registrationsTable.status,
+        paymentScreenshot: registrationsTable.paymentScreenshot,
+        createdAt: registrationsTable.createdAt,
         userName: users.name,
         userEmail: users.email,
         workshopTitle: workshops.title,
         workshopPrice: workshops.price,
         workshopIsFree: workshops.isFree
       })
-      .from(registrations)
-      .leftJoin(users, eq(registrations.userId, users.id))
-      .leftJoin(workshops, eq(registrations.workshopId, workshops.id))
-      .orderBy(desc(registrations.createdAt));
+      .from(registrationsTable)
+      .leftJoin(users, eq(registrationsTable.userId, users.id))
+      .leftJoin(workshops, eq(registrationsTable.workshopId, workshops.id))
+      .orderBy(desc(registrationsTable.createdAt));
 
-      res.json(registrations);
+      res.json(allRegistrations);
     } catch (error) {
       res.status(500).json({ message: 'Server error' });
     }

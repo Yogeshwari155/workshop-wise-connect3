@@ -47,7 +47,7 @@ app.use((req, res, next) => {
       )
     ]);
   } catch (error) {
-    console.error('Database seeding failed:', error.message);
+    console.error('Database seeding failed:', error instanceof Error ? error.message : 'Unknown error');
     console.log('Continuing without seeding...');
   }
   

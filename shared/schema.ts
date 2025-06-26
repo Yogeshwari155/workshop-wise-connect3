@@ -77,7 +77,6 @@ export const insertWorkshopSchema = createInsertSchema(workshops).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-  registeredSeats: true,
 });
 
 export const insertRegistrationSchema = createInsertSchema(registrations).omit({
