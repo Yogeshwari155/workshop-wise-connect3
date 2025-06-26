@@ -36,7 +36,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Check for saved token on app start
     const token = localStorage.getItem('authToken');
     const savedUser = localStorage.getItem('user');
-    
+
     if (token && savedUser) {
       try {
         setUser(JSON.parse(savedUser));
@@ -75,9 +75,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (userData: any): Promise<boolean> => {
     try {
-      const endpoint = userData.role === 'enterprise' 
-        ? '/api/auth/register/enterprise' 
-        : '/api/auth/register/user';
+      const endpoint = userData.role === 'enterprise'
+        ? '/api/auth/register/enterprise'
+        : '/api/auth/register/individual'; // Changed 'user' to 'individual'
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -93,8 +93,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('user', JSON.stringify(data.user));
         setUser(data.user);
         return true;
+      } else {
+        const errorData = await response.json();
+        console.error('Registration failed:', errorData);
+        return false;
       }
-      return false;
     } catch (error) {
       console.error('Registration error:', error);
       return false;

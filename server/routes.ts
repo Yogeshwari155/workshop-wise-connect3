@@ -52,10 +52,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register endpoint for users
   app.post('/api/auth/register/user', async (req, res) => {
     try {
-      const userData = registerUserSchema.parse(req.body);
-       const { name, email, password, confirmPassword } = req.body;
+      const { name, email, password, confirmPassword } = req.body;
 
-      if (!name || !email || !password) {
+      if (!name || !email || !password || !confirmPassword) {
         return res.status(400).json({ message: 'All fields are required' });
       }
 
@@ -63,16 +62,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'Passwords do not match' });
       }
 
-      const existingUser = await storage.getUserByEmail(userData.email);
+      const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
         return res.status(400).json({ message: 'Email already registered' });
       }
 
-      const hashedPassword = await hashPassword(userData.password);
+      const hashedPassword = await hashPassword(password);
 
       const user = await storage.createUser({
-        name: userData.name,
-        email: userData.email,
+        name,
+        email,
         password: hashedPassword,
         role: 'user'
       });
@@ -89,17 +88,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
     } catch (error) {
-      res.status(400).json({ message: 'Invalid request data' });
+      console.error('User registration error:', error);
+      res.status(400).json({ message: 'Registration failed. Please try again.' });
     }
   });
 
   // Register endpoint for enterprises
   app.post('/api/auth/register/enterprise', async (req, res) => {
     try {
-       const enterpriseData = registerEnterpriseSchema.parse(req.body);
-      const { companyName, name, email, password, confirmPassword, domain, location, website } = req.body;
+      const { companyName, contactPerson, email, password, confirmPassword, domain, location, website } = req.body;
 
-      if (!companyName || !name || !email || !password || !domain || !location) {
+      if (!companyName || !contactPerson || !email || !password || !confirmPassword) {
         return res.status(400).json({ message: 'All required fields must be provided' });
       }
 
@@ -107,26 +106,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'Passwords do not match' });
       }
 
-      const existingUser = await storage.getUserByEmail(enterpriseData.email);
+      const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
         return res.status(400).json({ message: 'Email already registered' });
       }
 
-      const hashedPassword = await hashPassword(enterpriseData.password);
+      const hashedPassword = await hashPassword(password);
 
       const user = await storage.createUser({
-        name: enterpriseData.name,
-        email: enterpriseData.email,
+        name: contactPerson,
+        email,
         password: hashedPassword,
         role: 'enterprise'
       });
 
       const enterprise = await storage.createEnterprise({
         userId: user.id,
-        companyName: enterpriseData.companyName,
-        domain: enterpriseData.domain,
-        location: enterpriseData.location,
-        website: enterpriseData.website,
+        companyName,
+        domain: domain || '',
+        location: location || '',
+        website: website || '',
         status: 'pending'
       });
 
@@ -143,7 +142,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         enterprise
       });
     } catch (error) {
-      res.status(400).json({ message: 'Invalid request data' });
+      console.error('Enterprise registration error:', error);
+      res.status(400).json({ message: 'Registration failed. Please try again.' });
     }
   });
 
