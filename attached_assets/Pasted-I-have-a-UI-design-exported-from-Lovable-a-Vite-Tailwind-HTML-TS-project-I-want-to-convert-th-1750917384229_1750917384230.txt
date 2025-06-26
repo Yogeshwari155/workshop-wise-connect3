@@ -1,0 +1,74 @@
+I have a UI design exported from Lovable (a Vite + Tailwind + HTML/TS project). I want to convert this into a fully functional full-stack Workshop Booking Website with these technologies and features:
+
+🔧 Tech Stack:
+- Frontend: Next.js + Tailwind CSS + TypeScript (convert from Vite)
+- Backend: Express.js + Node.js + PostgreSQL (with Sequelize or Prisma)
+- Auth: JWT-based authentication
+- Deployment:
+  - Frontend on Vercel
+  - Backend on Render or Railway
+  - Database on Neon/Supabase (PostgreSQL)
+
+🎯 App Roles and Functional Requirements:
+
+1. 👤 Normal User:
+   - Can sign up, log in, log out
+   - Can edit profile, change password, delete account
+   - Can browse **approved** workshops
+   - Can register for workshops via:
+     - Manual mode (admin approval)
+     - Automated mode (instant confirmation)
+       - If online, generate Google Meet link
+       - If paid, redirect to Google Form after payment screenshot
+   - Can view "My Workshops"
+   - Can download their data
+
+2. 🏢 Enterprise User:
+   - Can sign up as an enterprise
+   - Dashboard with:
+     - Create/edit/delete workshop
+     - View registrations for their own workshops
+     - Filter workshops by approval status
+     - List of users registered for each workshop
+
+3. 🛠️ Admin User:
+   - Default admin account
+   - Full dashboard with CRUD for:
+     - Users
+     - Enterprises
+     - Workshops
+     - Registrations
+   - Can approve/reject workshops
+   - Can manually approve user registrations for manual-mode workshops
+
+📦 API Requirements (Express.js):
+- `/api/auth` → Login, Signup (User/Admin/Enterprise), JWT tokens
+- `/api/users` → Get/edit/delete user profile
+- `/api/workshops` → CRUD for workshops
+- `/api/registrations` → Register, cancel, approve (by admin)
+- `/api/enterprises` → CRUD for enterprise accounts
+- Role-based middleware for access control
+
+📱 Frontend Features (Next.js):
+- Pages: Home, Login, Signup (User/Enterprise), Dashboard (role-based)
+- Workshop list (filters by location, type, status)
+- Workshop detail page (registration options)
+- Admin panel (full UI for management)
+- Enterprise dashboard
+- Responsive design with hover effects
+
+🧪 Additional:
+- Use Google Meet API for automated links
+- Use a mock or real UPI payment screenshot input for paid workshops
+- If a workshop is free, no payment is needed
+- Implement route protection based on JWT and role
+- Show error/success toasts and feedback throughout the UI
+- Include reusable components for buttons, cards, modals
+
+👉 Start by:
+- Migrating the Vite-based UI into a Next.js app
+- Building backend folder with Express boilerplate
+- Connecting frontend to backend
+- Making all features above functional with live data
+
+Final output should be ready for Vercel + Render deployment.

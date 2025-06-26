@@ -1,35 +1,65 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
+import ModernWorkshopCard from '../components/ModernWorkshopCard';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import { Card, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Calendar, MapPin, IndianRupee, Users, Clock, Star, Search, Filter } from 'lucide-react';
-import { useWorkshops } from '../hooks/useWorkshops';
+import { Search, Filter, Grid, List, SlidersHorizontal } from 'lucide-react';
+import { workshopApi } from '../utils/api';
 
 const Workshops = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [priceFilter, setPriceFilter] = useState('all');
   const [modeFilter, setModeFilter] = useState('all');
+  const [difficultyFilter, setDifficultyFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('date');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
-  const { data: workshops = [], isLoading, error } = useWorkshops();
-
-  const filteredWorkshops = workshops.filter((workshop: any) => {
-    const matchesSearch = workshop.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         workshop.tags?.some((tag: string) => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesPrice = priceFilter === 'all' || 
-                        (priceFilter === 'free' && workshop.isFree) ||
-                        (priceFilter === 'paid' && !workshop.isFree);
-    
-    const matchesMode = modeFilter === 'all' || workshop.mode.toLowerCase() === modeFilter;
-    
-    return matchesSearch && matchesPrice && matchesMode;
+  // Fetch workshops from API - only approved ones
+  const { data: workshops = [], isLoading, error } = useQuery({
+    queryKey: ['workshops'],
+    queryFn: workshopApi.getAll,
   });
+
+  // Filter workshops - only show approved workshops to users
+  const filteredWorkshops = workshops
+    .filter((workshop: any) => {
+      // Only show approved workshops to users
+      if (workshop.status !== 'approved') return false;
+      
+      const matchesSearch = workshop.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           (workshop.enterprise?.companyName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           workshop.tags?.some((tag: string) => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+      
+      const matchesPrice = priceFilter === 'all' || 
+                          (priceFilter === 'free' && workshop.isFree) ||
+                          (priceFilter === 'paid' && !workshop.isFree);
+      
+      const matchesMode = modeFilter === 'all' || workshop.mode.toLowerCase() === modeFilter;
+      
+      const matchesDifficulty = difficultyFilter === 'all' || 
+                               (workshop.difficulty && workshop.difficulty.toLowerCase() === difficultyFilter);
+      
+      return matchesSearch && matchesPrice && matchesMode && matchesDifficulty;
+    })
+    .sort((a: any, b: any) => {
+      switch (sortBy) {
+        case 'date':
+          return new Date(a.date).getTime() - new Date(b.date).getTime();
+        case 'price':
+          return (a.price || 0) - (b.price || 0);
+        case 'popularity':
+          return b.registeredSeats - a.registeredSeats;
+        case 'rating':
+          return 5 - 4.9; // Mock rating sort
+        default:
+          return 0;
+      }
+    });
 
   if (isLoading) {
     return (
@@ -71,8 +101,8 @@ const Workshops = () => {
 
         {/* Search and Filters */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="relative">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+            <div className="relative md:col-span-2">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Search workshops, companies, or tags..."
@@ -105,18 +135,57 @@ const Workshops = () => {
               </SelectContent>
             </Select>
 
-            <Button variant="outline" className="flex items-center space-x-2">
-              <Filter className="h-4 w-4" />
-              <span>More Filters</span>
-            </Button>
+            <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Level" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Levels</SelectItem>
+                <SelectItem value="beginner">Beginner</SelectItem>
+                <SelectItem value="intermediate">Intermediate</SelectItem>
+                <SelectItem value="advanced">Advanced</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger>
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="date">Date</SelectItem>
+                <SelectItem value="price">Price</SelectItem>
+                <SelectItem value="popularity">Popularity</SelectItem>
+                <SelectItem value="rating">Rating</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
-        {/* Results Count */}
-        <div className="mb-6">
-          <p className="text-gray-600">
-            Showing {filteredWorkshops.length} of {workshops.length} workshops
-          </p>
+        {/* Results Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <p className="text-gray-600">
+              Showing {filteredWorkshops.length} of {workshops.filter((w: any) => w.status === 'approved').length} workshops
+            </p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant={viewMode === 'grid' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('grid')}
+              className="p-2"
+            >
+              <Grid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === 'list' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('list')}
+              className="p-2"
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         {/* Workshop Grid */}
