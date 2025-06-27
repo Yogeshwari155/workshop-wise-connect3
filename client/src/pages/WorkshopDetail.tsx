@@ -20,15 +20,15 @@ import { fetchWorkshopDetails } from "../utils/api"; // Make sure this function 
 const WorkshopDetail = () => {
   const { id } = useParams();
   const { isAuthenticated } = useAuth();
-  const [workshopData, setWorkshopData] = useState(null);
+  const [workshopData, setWorkshopData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<any>(null);
 
   useEffect(() => {
     const getWorkshopDetails = async () => {
       setLoading(true);
       try {
-        const data = await fetchWorkshopDetails(id); // Fetching actual workshop data
+        const data = await fetchWorkshopDetails(id || ''); // Fetching actual workshop data
         setWorkshopData(data);
       } catch (err) {
         setError(err);
@@ -37,7 +37,9 @@ const WorkshopDetail = () => {
       }
     };
 
-    getWorkshopDetails();
+    if (id) {
+      getWorkshopDetails();
+    }
   }, [id]);
 
   if (loading) return <div>Loading...</div>;
@@ -100,7 +102,7 @@ const WorkshopDetail = () => {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {workshopData.tags.map((tag) => (
+                  {workshopData.tags && workshopData.tags.map((tag: string) => (
                     <Badge key={tag} variant="secondary">
                       {tag}
                     </Badge>
@@ -242,7 +244,7 @@ const WorkshopDetail = () => {
                 <div className="prose prose-gray max-w-none">
                   {workshopData.description
                     .split("\n")
-                    .map((paragraph, index) => (
+                    .map((paragraph: string, index: number) => (
                       <p
                         key={index}
                         className="text-gray-700 leading-relaxed mb-4"
@@ -255,88 +257,60 @@ const WorkshopDetail = () => {
             </Card>
 
             {/* Agenda */}
-            <Card className="border-0 shadow-lg">
-              <CardContent className="p-8">
-                <h2 className="text-2xl font-display font-bold text-gray-900 mb-6">
-                  Workshop Agenda
-                </h2>
-                <div className="space-y-4">
-                  {Array.isArray(workshopData.agenda) &&
-                  workshopData.agenda.length > 0 ? (
-                    workshopData.agenda.map((item, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg"
-                      >
-                        <div className="bg-gradient-to-r from-primary-500 to-accent-500 text-white w-12 h-12 rounded-full flex items-center justify-center font-bold">
-                          {index + 1}
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900">
-                            {item.day}
-                          </h3>
-                          <p className="text-gray-600">{item.topic}</p>
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {item.duration}
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div>No agenda available for this workshop.</div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            {workshopData.agenda && (
+              <Card className="border-0 shadow-lg">
+                <CardContent className="p-8">
+                  <h2 className="text-2xl font-display font-bold text-gray-900 mb-6">
+                    Workshop Agenda
+                  </h2>
+                  <div className="prose prose-gray max-w-none">
+                    <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
+                      {workshopData.agenda}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Instructor */}
-          <div className="lg:col-span-1">
-            <Card className="border-0 shadow-lg">
-              <CardContent className="p-6">
-                <h2 className="text-xl font-display font-bold text-gray-900 mb-4">
-                  Your Instructor
-                </h2>
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-4">
-                    {workshopData.instructor?.avatar?(
-                    <img
-                      src={workshopData.instructor.avatar}
-                      alt={workshopData.instructor.name}
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
-      ):(
-      <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center">
-          {/* Placeholder if the avatar is not available */}
-          <span className="text-gray-500">No Image</span>
-        </div>
-      )}
-                    <div>
-                      <h3 className="font-semibold text-gray-900">
-                        {workshopData.instructor?.name || "Unknown Instructor"}
-                      </h3>
-                      <p className="text-gray-600 text-sm">
-                        {workshopData.instructor?.designation || "N/A"}
-                      </p>
+          {workshopData.instructor && (
+            <div className="lg:col-span-1">
+              <Card className="border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <h2 className="text-xl font-display font-bold text-gray-900 mb-4">
+                    Your Instructor
+                  </h2>
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-r from-primary-500 to-accent-500 flex items-center justify-center text-white font-bold text-xl">
+                        {workshopData.instructor.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900">
+                          {workshopData.instructor}
+                        </h3>
+                        <p className="text-gray-600 text-sm">
+                          Workshop Instructor
+                        </p>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center space-x-2 text-gray-600">
-                      <Building className="h-4 w-4" />
-                      <span>{workshopData.instructor?.company || "N/A"}</span>
-                    </div>
-                    <div className="flex items-center space-x-2 text-gray-600">
-                      <User className="h-4 w-4" />
-                      <span>
-                        {workshopData.instructor?.experience || "0"} experience
-                      </span>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center space-x-2 text-gray-600">
+                        <Building className="h-4 w-4" />
+                        <span>{workshopData.enterprise?.companyName || workshopData.company}</span>
+                      </div>
+                      <div className="flex items-center space-x-2 text-gray-600">
+                        <User className="h-4 w-4" />
+                        <span>Expert Instructor</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       </div>
 

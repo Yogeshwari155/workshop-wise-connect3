@@ -1,7 +1,9 @@
 import type { Express } from "express";
+import express from "express";
 import { createServer, type Server } from "http";
 import cors from "cors";
 import multer from "multer";
+import path from "path";
 import { storage } from "./storage";
 import { authenticateToken, requireRole, type AuthRequest } from "./middleware/auth";
 import { hashPassword, comparePassword, generateToken, generateMeetLink } from "./utils/auth";
@@ -20,6 +22,9 @@ const upload = multer({ dest: 'uploads/' });
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.use(cors());
+  
+  // Serve uploaded files statically
+  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
   // Authentication routes
   app.post('/api/auth/login', async (req, res) => {
@@ -355,7 +360,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/enterprise/workshops', authenticateToken, requireRole(['enterprise']), async (req: AuthRequest, res) => {
+  app.post('/api/enterprise/workshops', authenticateToken, requireRole(['enterprise']), upload.single('image'), async (req: AuthRequest, res) => {
     try {
       const enterprise = await storage.getEnterpriseByUserId(req.user!.id);
       if (!enterprise) {
@@ -368,10 +373,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('Received workshop data:', JSON.stringify(req.body, null, 2));
 
-      // Convert date string to Date object if needed
+      // Parse tags if they come as JSON string
+      let tags = req.body.tags;
+      if (typeof tags === 'string') {
+        try {
+          tags = JSON.parse(tags);
+        } catch {
+          tags = tags.split(',').map((tag: string) => tag.trim());
+        }
+      }
+
+      // Convert date string to Date object and handle FormData parsing
       const requestData = {
         ...req.body,
-        date: typeof req.body.date === 'string' ? new Date(req.body.date) : req.body.date
+        tags,
+        date: typeof req.body.date === 'string' ? new Date(req.body.date) : req.body.date,
+        price: Number(req.body.price),
+        seats: Number(req.body.seats),
+        isFree: req.body.isFree === 'true'
       };
 
       const workshopData = insertWorkshopSchema.parse(requestData);
@@ -382,9 +401,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         meetLink = generateMeetLink();
       }
 
-      // Generate default image based on domain if not provided
-      let defaultImage: string | null = null;
-      if (!workshopData.image) {
+      // Handle image upload or generate default image
+      let imageUrl = null;
+      if (req.file) {
+        // Use uploaded file
+        imageUrl = `/uploads/${req.file.filename}`;
+      } else {
+        // Generate default image based on enterprise domain
         const domainImages: Record<string, string> = {
           'Technology': '/api/placeholder/400x300?text=Tech+Workshop&bg=4f46e5&color=white',
           'Business': '/api/placeholder/400x300?text=Business+Workshop&bg=059669&color=white',
@@ -395,14 +418,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           'Education': '/api/placeholder/400x300?text=Education+Workshop&bg=ea580c&color=white',
           'Other': '/api/placeholder/400x300?text=Workshop&bg=6b7280&color=white'
         };
-        defaultImage = domainImages[enterprise.domain || 'Other'] || domainImages['Other'];
+        imageUrl = domainImages[enterprise.domain || 'Other'] || domainImages['Other'];
       }
 
       const workshopToCreate = {
         ...workshopData,
         enterpriseId: enterprise.id,
         meetLink: meetLink || null,
-        image: workshopData.image || defaultImage,
+        image: imageUrl,
         status: 'pending' as const
       };
 

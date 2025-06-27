@@ -41,6 +41,7 @@ const workshopSchema = z.object({
   seats: z.number().min(1),
   registrationMode: z.enum(['automated', 'manual']),
   tags: z.string().optional(),
+  image: z.any().optional(),
 });
 
 type WorkshopForm = z.infer<typeof workshopSchema>;
@@ -88,13 +89,30 @@ const EnterpriseDashboard = () => {
 
   const createWorkshopMutation = useMutation({
     mutationFn: async (workshopData: any) => {
+      const formData = new FormData();
+      
+      // Add all workshop data except image to FormData
+      Object.keys(workshopData).forEach(key => {
+        if (key !== 'image') {
+          if (key === 'tags' && Array.isArray(workshopData[key])) {
+            formData.append(key, JSON.stringify(workshopData[key]));
+          } else {
+            formData.append(key, workshopData[key]);
+          }
+        }
+      });
+
+      // Add image if provided
+      if (workshopData.image && workshopData.image instanceof File) {
+        formData.append('image', workshopData.image);
+      }
+
       const response = await fetch('/api/enterprise/workshops', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(workshopData),
+        body: formData,
       });
 
       if (!response.ok) {
@@ -137,6 +155,7 @@ const EnterpriseDashboard = () => {
     createWorkshopMutation.mutate({
       ...workshopData,
       tags: tagsArray,
+      image: data.image,
     });
   };
 
@@ -484,6 +503,28 @@ const EnterpriseDashboard = () => {
                           <FormControl>
                             <Input placeholder="React, JavaScript, Frontend" {...field} />
                           </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="image"
+                      render={({ field }) => (
+                        <FormItem className="col-span-2">
+                          <FormLabel>Workshop Image (optional)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="file" 
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                field.onChange(file);
+                              }}
+                            />
+                          </FormControl>
+                          <p className="text-sm text-gray-500">Upload a custom image for your workshop card</p>
                           <FormMessage />
                         </FormItem>
                       )}
