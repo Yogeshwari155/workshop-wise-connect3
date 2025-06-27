@@ -44,7 +44,8 @@ const workshopSchema = z.object({
 type WorkshopForm = z.infer<typeof workshopSchema>;
 
 const EnterpriseDashboard = () => {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
+  const token = localStorage.getItem('authToken');
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -93,7 +94,16 @@ const EnterpriseDashboard = () => {
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Workshop creation error:', errorText);
         throw new Error('Failed to create workshop');
+      }
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('Unexpected response format:', text);
+        throw new Error('Invalid response format from server');
       }
 
       const newWorkshop = await response.json();

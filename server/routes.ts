@@ -355,6 +355,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post('/api/enterprise/workshops', authenticateToken, requireRole(['enterprise']), async (req: AuthRequest, res) => {
+    try {
+      const enterprise = await storage.getEnterpriseByUserId(req.user!.id);
+      if (!enterprise) {
+        return res.status(400).json({ message: 'Enterprise profile not found' });
+      }
+
+      if (enterprise.status !== 'approved') {
+        return res.status(400).json({ message: 'Enterprise not approved yet' });
+      }
+
+      console.log('Received workshop data:', JSON.stringify(req.body, null, 2));
+
+      // Convert date string to Date object if needed
+      const requestData = {
+        ...req.body,
+        date: typeof req.body.date === 'string' ? new Date(req.body.date) : req.body.date
+      };
+
+      const workshopData = insertWorkshopSchema.parse(requestData);
+
+      // Generate meet link if online and automated
+      let meetLink = null;
+      if (workshopData.mode === 'online' && workshopData.registrationMode === 'automated') {
+        meetLink = generateMeetLink();
+      }
+
+      // Generate default image based on domain if not provided
+      let defaultImage: string | null = null;
+      if (!workshopData.image) {
+        const domainImages: Record<string, string> = {
+          'Technology': '/api/placeholder/400x300?text=Tech+Workshop&bg=4f46e5&color=white',
+          'Business': '/api/placeholder/400x300?text=Business+Workshop&bg=059669&color=white',
+          'Design': '/api/placeholder/400x300?text=Design+Workshop&bg=dc2626&color=white',
+          'Marketing': '/api/placeholder/400x300?text=Marketing+Workshop&bg=7c3aed&color=white',
+          'Finance': '/api/placeholder/400x300?text=Finance+Workshop&bg=0891b2&color=white',
+          'Health': '/api/placeholder/400x300?text=Health+Workshop&bg=16a34a&color=white',
+          'Education': '/api/placeholder/400x300?text=Education+Workshop&bg=ea580c&color=white',
+          'Other': '/api/placeholder/400x300?text=Workshop&bg=6b7280&color=white'
+        };
+        defaultImage = domainImages[enterprise.domain || 'Other'] || domainImages['Other'];
+      }
+
+      const workshopToCreate = {
+        ...workshopData,
+        enterpriseId: enterprise.id,
+        meetLink: meetLink || null,
+        image: workshopData.image || defaultImage,
+        status: 'pending' as const
+      };
+
+      const workshop = await storage.createWorkshop(workshopToCreate);
+
+      res.status(201).json(workshop);
+    } catch (error) {
+      console.error('Workshop creation error:', error);
+      if (error instanceof Error) {
+        console.error('Error details:', error.message);
+      }
+      res.status(400).json({ message: 'Invalid request data', error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+
   app.put('/api/workshops/:id', authenticateToken, requireRole(['enterprise']), async (req: AuthRequest, res) => {
     try {
       const enterprise = await storage.getEnterpriseByUserId(req.user!.id);
@@ -606,6 +669,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Profile update error:', error);
       res.status(400).json({ message: 'Failed to update profile' });
     }
+  });
+
+  // Placeholder image service
+  app.get('/api/placeholder/:dimensions', (req, res) => {
+    const { dimensions } = req.params;
+    const { text = 'Placeholder', bg = '6b7280', color = 'white' } = req.query;
+    
+    const [width, height] = dimensions.split('x').map(d => parseInt(d) || 400);
+    
+    // Create a simple SVG placeholder
+    const svg = `
+      <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100%" height="100%" fill="#${bg}"/>
+        <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="${Math.min(width, height) / 8}" 
+              fill="${color}" text-anchor="middle" dominant-baseline="central">${text}</text>
+      </svg>
+    `;
+    
+    res.setHeader('Content-Type', 'image/svg+xml');
+    res.send(svg);
   });
 
   // File upload for payment screenshots

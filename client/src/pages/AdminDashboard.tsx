@@ -59,6 +59,21 @@ const AdminDashboard = () => {
     refetchOnWindowFocus: true,
   });
 
+  const { data: registrations = [], refetch: refetchRegistrations } = useQuery({
+    queryKey: ['/api/admin/registrations'],
+    queryFn: async () => {
+      const response = await fetch('/api/admin/registrations', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch registrations');
+      return response.json();
+    },
+    refetchInterval: 30000,
+    refetchOnWindowFocus: true,
+  });
+
   const handleWorkshopAction = async (workshopId: number, action: 'approve' | 'reject') => {
     try {
       const response = await fetch(`/api/admin/workshops/${workshopId}/status`, {
@@ -125,9 +140,41 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleRegistrationAction = async (registrationId: number, action: 'approve' | 'reject') => {
+    try {
+      const response = await fetch(`/api/admin/registrations/${registrationId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        },
+        body: JSON.stringify({ 
+          status: action === 'approve' ? 'approved' : 'rejected' 
+        })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: `Registration ${action}d successfully`,
+        });
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/registrations'] });
+      } else {
+        throw new Error('Failed to update registration status');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update registration status",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Calculate stats
   const pendingWorkshops = workshops.filter((w: any) => w.status === 'pending').length;
   const pendingEnterprises = enterprises.filter((e: any) => e.status === 'pending').length;
+  const pendingRegistrations = registrations.filter((r: any) => r.status === 'pending').length;
   const totalUsers = users.filter((u: any) => u.role === 'user').length;
 
   return (
@@ -151,6 +198,7 @@ const AdminDashboard = () => {
                 refetchUsers();
                 refetchEnterprises();
                 refetchWorkshops();
+                refetchRegistrations();
               }}
               variant="outline"
               className="bg-white/10 border-white/20 text-white hover:bg-white/20"
@@ -229,9 +277,10 @@ const AdminDashboard = () => {
       <section className="py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Tabs defaultValue="workshops" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3 max-w-md mx-auto">
+            <TabsList className="grid w-full grid-cols-4 max-w-xl mx-auto">
               <TabsTrigger value="workshops">Workshops</TabsTrigger>
               <TabsTrigger value="enterprises">Enterprises</TabsTrigger>
+              <TabsTrigger value="registrations">Registrations</TabsTrigger>
               <TabsTrigger value="users">Users</TabsTrigger>
             </TabsList>
 
@@ -331,6 +380,66 @@ const AdminDashboard = () => {
                                 size="sm"
                                 variant="destructive"
                                 onClick={() => handleEnterpriseAction(enterprise.id, 'reject')}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Registration Management */}
+            <TabsContent value="registrations" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Registration Management</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {registrations.map((registration: any) => (
+                      <div key={registration.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900">{registration.userName}</h3>
+                          <p className="text-sm text-gray-600">{registration.userEmail}</p>
+                          <p className="text-sm text-gray-600 mt-1">Workshop: {registration.workshopTitle}</p>
+                          {registration.reason && (
+                            <p className="text-xs text-gray-500 mt-2">Reason: {registration.reason}</p>
+                          )}
+                          <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                            <div className="flex items-center space-x-1">
+                              <Calendar className="h-4 w-4" />
+                              <span>{new Date(registration.createdAt).toLocaleDateString()}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <IndianRupee className="h-4 w-4" />
+                              <span>{registration.workshopIsFree ? 'Free' : `₹${registration.workshopPrice}`}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Badge variant={
+                            registration.status === 'approved' ? 'default' :
+                            registration.status === 'rejected' ? 'destructive' : 'secondary'
+                          }>
+                            {registration.status}
+                          </Badge>
+                          {registration.status === 'pending' && (
+                            <>
+                              <Button
+                                size="sm"
+                                onClick={() => handleRegistrationAction(registration.id, 'approve')}
+                              >
+                                <Check className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleRegistrationAction(registration.id, 'reject')}
                               >
                                 <X className="h-4 w-4" />
                               </Button>
