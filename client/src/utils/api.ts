@@ -1,4 +1,3 @@
-
 const API_BASE = '/api';
 
 export const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
@@ -88,7 +87,7 @@ export const registrationApi = {
 
   create: async (data: { workshopId: number; reason?: string; paymentScreenshot?: File | null }): Promise<Registration> => {
     const token = localStorage.getItem('authToken');
-    
+
     if (!token) {
       throw new Error('Authentication required');
     }
@@ -107,7 +106,7 @@ export const registrationApi = {
       },
       body: JSON.stringify(requestBody),
     });
-    
+
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || 'Failed to create registration');
