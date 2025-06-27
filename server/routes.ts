@@ -205,7 +205,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       console.log('Received workshop data:', JSON.stringify(req.body, null, 2));
-      const workshopData = insertWorkshopSchema.parse(req.body);
+      
+      // Convert date string to Date object if needed
+      const requestData = {
+        ...req.body,
+        date: typeof req.body.date === 'string' ? new Date(req.body.date) : req.body.date
+      };
+      
+      const workshopData = insertWorkshopSchema.parse(requestData);
 
       // Generate meet link if online and automated
       let meetLink = null;
@@ -213,12 +220,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         meetLink = generateMeetLink();
       }
 
-      const workshop = await storage.createWorkshop({
+      const workshopToCreate = {
         ...workshopData,
         enterpriseId: enterprise.id,
-        meetLink,
-        status: 'pending'
-      });
+        meetLink: meetLink || null,
+        status: 'pending' as const
+      };
+      
+      const workshop = await storage.createWorkshop(workshopToCreate);
 
       res.status(201).json(workshop);
     } catch (error) {

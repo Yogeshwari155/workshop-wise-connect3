@@ -75,6 +75,7 @@ export const insertEnterpriseSchema = createInsertSchema(enterprises).omit({
 
 export const insertWorkshopSchema = createInsertSchema(workshops).omit({
   id: true,
+  enterpriseId: true,
   createdAt: true,
   updatedAt: true,
 });
