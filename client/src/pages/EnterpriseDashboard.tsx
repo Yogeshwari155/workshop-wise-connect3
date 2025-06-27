@@ -18,7 +18,7 @@ import { z } from 'zod';
 import { format } from 'date-fns';
 import { CalendarIcon, Plus, Users, Eye, Clock, MapPin, IndianRupee, RefreshCw } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { enterpriseApi, apiRequest } from '../utils/api';
+import { enterpriseApi, apiRequest, workshopApi } from '../utils/api';
 import { useToast } from '../hooks/use-toast';
 
 const workshopSchema = z.object({
@@ -79,10 +79,7 @@ const EnterpriseDashboard = () => {
   });
 
   const createWorkshopMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/workshops', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
+    mutationFn: (data: any) => workshopApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['enterprise-workshops'] });
       setIsCreateDialogOpen(false);
@@ -103,8 +100,9 @@ const EnterpriseDashboard = () => {
 
   const onSubmit = (data: WorkshopForm) => {
     const tagsArray = data.tags ? data.tags.split(',').map(tag => tag.trim()) : [];
+    const { tags, ...workshopData } = data;
     createWorkshopMutation.mutate({
-      ...data,
+      ...workshopData,
       tags: tagsArray,
     });
   };
