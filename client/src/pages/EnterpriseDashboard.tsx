@@ -18,7 +18,7 @@ import { z } from 'zod';
 import { format } from 'date-fns';
 import { CalendarIcon, Plus, Users, Eye, Clock, MapPin, IndianRupee, RefreshCw } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { enterpriseApi, apiRequest } from '../utils/api';
+import { enterpriseApi, workshopApi } from '../utils/api';
 import { useToast } from '../hooks/use-toast';
 
 const workshopSchema = z.object({

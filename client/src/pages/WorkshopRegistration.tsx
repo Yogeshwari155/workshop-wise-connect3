@@ -11,7 +11,7 @@ import { Textarea } from '../components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group';
 import { useToast } from '../hooks/use-toast';
 import { useWorkshop, useRegisterForWorkshop } from '../hooks/useWorkshops';
-import { Calendar, MapPin, IndianRupee, Users, Upload, CreditCard, Clock } from 'lucide-react';
+import { Calendar, MapPin, IndianRupee, Users, Upload, CreditCard, Clock, CheckCircle } from 'lucide-react';
 
 const WorkshopRegistration = () => {
   const { id } = useParams();
@@ -26,16 +26,31 @@ const WorkshopRegistration = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Mock workshop data
-  const workshop = {
-    title: "Advanced React Development",
-    company: "TechCorp Solutions",
-    price: 2500,
-    isFree: false,
-    date: "15 Jan 2025",
-    seats: 25,
-    bookedSeats: 18
-  };
+  const { data: workshop, isLoading, error } = useWorkshop(parseInt(id || '0'));
+  const registerMutation = useRegisterForWorkshop();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading workshop details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !workshop) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Workshop Not Found</h1>
+          <p className="text-gray-600 mb-4">The workshop you're looking for doesn't exist.</p>
+          <Button onClick={() => navigate('/workshops')}>View All Workshops</Button>
+        </div>
+      </div>
+    );
+  }
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -49,9 +64,6 @@ const WorkshopRegistration = () => {
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
       if (registrationMode === 'automated') {
         if (!workshop.isFree && !paymentScreenshot) {
           toast({
@@ -62,24 +74,44 @@ const WorkshopRegistration = () => {
           setIsSubmitting(false);
           return;
         }
+      } else {
+        if (!formData.reason.trim()) {
+          toast({
+            variant: "destructive",
+            title: "Reason required",
+            description: "Please provide a reason for wanting to attend this workshop.",
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      }
 
+      const registrationData = {
+        workshopId: workshop.id,
+        reason: registrationMode === 'manual' ? formData.reason : '',
+        paymentScreenshot: paymentScreenshot
+      };
+
+      await registerMutation.mutateAsync(registrationData);
+
+      if (registrationMode === 'automated') {
         toast({
           title: "Registration Successful! 🎉",
           description: "You're confirmed for the workshop. Check your email for details.",
         });
-        navigate('/dashboard');
       } else {
         toast({
           title: "Registration Submitted! ⏳",
           description: "Your request has been sent to admin for approval. You'll be notified via email.",
         });
-        navigate('/dashboard');
       }
+      
+      navigate('/dashboard');
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Registration failed",
-        description: "Please try again later.",
+        description: error instanceof Error ? error.message : "Please try again later.",
       });
     } finally {
       setIsSubmitting(false);
@@ -110,7 +142,11 @@ const WorkshopRegistration = () => {
               </div>
               <div className="flex items-center space-x-2 text-gray-600">
                 <Calendar className="h-5 w-5" />
-                <span>{workshop.date}</span>
+                <span>{new Date(workshop.date).toLocaleDateString('en-US', { 
+                  day: 'numeric', 
+                  month: 'short', 
+                  year: 'numeric' 
+                })}</span>
               </div>
               <div className="flex items-center space-x-2">
                 {workshop.isFree ? (
@@ -289,7 +325,7 @@ const WorkshopRegistration = () => {
                   <div className="flex justify-between">
                     <span>Seats Left:</span>
                     <span className="font-medium">
-                      {workshop.seats - workshop.bookedSeats}
+                      {workshop.seats - workshop.registeredSeats}
                     </span>
                   </div>
                 </div>
