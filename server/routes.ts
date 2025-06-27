@@ -25,9 +25,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/auth/login', async (req, res) => {
     try {
       console.log('Login request:', req.body);
-      
+
       const { email, password } = req.body;
-      
+
       if (!email || !password) {
         return res.status(400).json({ message: 'Email and password are required' });
       }
@@ -205,13 +205,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       console.log('Received workshop data:', JSON.stringify(req.body, null, 2));
-      
+
       // Convert date string to Date object if needed
       const requestData = {
         ...req.body,
         date: typeof req.body.date === 'string' ? new Date(req.body.date) : req.body.date
       };
-      
+
       const workshopData = insertWorkshopSchema.parse(requestData);
 
       // Generate meet link if online and automated
@@ -226,7 +226,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         meetLink: meetLink || null,
         status: 'pending' as const
       };
-      
+
       const workshop = await storage.createWorkshop(workshopToCreate);
 
       res.status(201).json(workshop);
@@ -244,7 +244,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log('Registration request body:', req.body);
       console.log('Authenticated user:', req.user);
-      
+
       if (!req.user) {
         return res.status(401).json({ message: 'User not authenticated' });
       }
@@ -369,7 +369,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const workshopData = insertWorkshopSchema.parse(req.body);
       const updatedWorkshop = await storage.updateWorkshop(parseInt(req.params.id), workshopData);
-      
+
       res.json(updatedWorkshop);
     } catch (error) {
       res.status(400).json({ message: 'Invalid request data' });
@@ -554,12 +554,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Profile management routes
+  // Profile routes
   app.get('/api/profile', authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const profile = await storage.getUserProfile(req.user!.id);
-      res.json(profile || {});
+      let profile = await storage.getUserProfile(req.user!.id);
+
+      // If no profile exists, create a default one
+      if (!profile) {
+        profile = await storage.updateUserProfile(req.user!.id, {
+          name: req.user!.name,
+          phone: '',
+          location: '',
+          bio: '',
+          company: '',
+          skills: '',
+          experience: ''
+        });
+      }
+
+      res.json(profile);
     } catch (error) {
+      console.error('Profile fetch error:', error);
       res.status(500).json({ message: 'Server error' });
     }
   });
@@ -567,7 +582,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/profile', authenticateToken, async (req: AuthRequest, res) => {
     try {
       const { name, phone, location, bio, company, skills, experience } = req.body;
-      
+
       const profileData = {
         userId: req.user!.id,
         name: name || req.user!.name,
@@ -580,7 +595,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       const profile = await storage.updateUserProfile(req.user!.id, profileData);
-      
+
       // Also update user name if changed
       if (name && name !== req.user!.name) {
         await storage.updateUser(req.user!.id, { name });

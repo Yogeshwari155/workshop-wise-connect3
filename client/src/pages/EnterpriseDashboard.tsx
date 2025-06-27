@@ -42,7 +42,7 @@ const workshopSchema = z.object({
 type WorkshopForm = z.infer<typeof workshopSchema>;
 
 const EnterpriseDashboard = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -80,7 +80,23 @@ const EnterpriseDashboard = () => {
   });
 
   const createWorkshopMutation = useMutation({
-    mutationFn: (data: any) => workshopApi.create(data),
+    mutationFn: async (workshopData: any) => {
+      const response = await fetch('/api/enterprise/workshops', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(workshopData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create workshop');
+      }
+
+      const newWorkshop = await response.json();
+      return newWorkshop;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['enterprise-workshops'] });
       setIsCreateDialogOpen(false);

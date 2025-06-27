@@ -182,21 +182,26 @@ export class PostgresStorage implements IStorage {
   }
 
   async updateUserProfile(userId: number, data: Partial<InsertUserProfile>): Promise<UserProfile> {
-    // Try to update existing profile
-    const updated = await db.update(userProfiles)
-      .set({ ...data, updatedAt: new Date() })
-      .where(eq(userProfiles.userId, userId))
-      .returning();
+    try {
+      // Try to update existing profile
+      const updated = await db.update(userProfiles)
+        .set({ ...data, updatedAt: new Date() })
+        .where(eq(userProfiles.userId, userId))
+        .returning();
 
-    if (updated.length > 0) {
-      return updated[0];
+      if (updated.length > 0) {
+        return updated[0];
+      }
+
+      // If no profile exists, create one
+      const created = await db.insert(userProfiles)
+        .values({ ...data, userId })
+        .returning();
+      return created[0];
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+      throw error;
     }
-
-    // If no profile exists, create one
-    const created = await db.insert(userProfiles)
-      .values({ ...data, userId })
-      .returning();
-    return created[0];
   }
 }
 
