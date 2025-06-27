@@ -204,6 +204,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'Enterprise not approved yet' });
       }
 
+      console.log('Received workshop data:', JSON.stringify(req.body, null, 2));
       const workshopData = insertWorkshopSchema.parse(req.body);
 
       // Generate meet link if online and automated
@@ -221,7 +222,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(201).json(workshop);
     } catch (error) {
-      res.status(400).json({ message: 'Invalid request data' });
+      console.error('Workshop creation error:', error);
+      if (error instanceof Error) {
+        console.error('Error details:', error.message);
+      }
+      res.status(400).json({ message: 'Invalid request data', error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
