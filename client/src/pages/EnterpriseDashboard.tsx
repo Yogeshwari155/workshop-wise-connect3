@@ -27,6 +27,8 @@ import { CalendarIcon, Clock, IndianRupee, RefreshCw } from 'lucide-react';
 const workshopSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().min(1, 'Description is required'),
+  instructor: z.string().min(1, 'Instructor is required'),
+  agenda: z.string().min(1, 'Agenda is required'),
   date: z.date({
     required_error: "Please select a date for the workshop.",
   }),
@@ -56,6 +58,8 @@ const EnterpriseDashboard = () => {
     defaultValues: {
       title: '',
       description: '',
+      instructor: '',
+      agenda: '',
       date: undefined,
       time: '',
       duration: '',
@@ -221,6 +225,38 @@ const EnterpriseDashboard = () => {
                             <Textarea 
                               placeholder="Describe your workshop..."
                               className="min-h-[100px]"
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="instructor"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Instructor</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Instructor name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="agenda"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Agenda</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Workshop agenda and topics..."
+                              className="min-h-[80px]"
                               {...field} 
                             />
                           </FormControl>

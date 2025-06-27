@@ -29,6 +29,8 @@ export const workshops = pgTable("workshops", {
   enterpriseId: integer("enterprise_id").references(() => enterprises.id).notNull(),
   title: text("title").notNull(),
   description: text("description").notNull(),
+  instructor: text("instructor").notNull(),
+  agenda: text("agenda").notNull(),
   date: timestamp("date").notNull(),
   time: text("time").notNull(),
   duration: text("duration").notNull(),

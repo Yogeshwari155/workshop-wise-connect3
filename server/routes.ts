@@ -494,8 +494,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/users', authenticateToken, requireRole(['admin']), async (req: AuthRequest, res) => {
     try {
       const users = await storage.getAllUsers();
-      res.json(users.map(user => ({ ...user, password: undefined })));
+      
+      // Get user registrations for activity tracking
+      const usersWithActivity = await Promise.all(
+        users.map(async (user) => {
+          const registrations = await storage.getRegistrationsByUserId(user.id);
+          const registrationsWithWorkshops = await Promise.all(
+            registrations.map(async (reg) => {
+              const workshop = await storage.getWorkshopById(reg.workshopId);
+              return { ...reg, workshop };
+            })
+          );
+          return {
+            ...user,
+            password: undefined,
+            registrations: registrationsWithWorkshops
+          };
+        })
+      );
+      
+      res.json(usersWithActivity);
     } catch (error) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+
+  app.delete('/api/admin/users/:id', authenticateToken, requireRole(['admin']), async (req: AuthRequest, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      
+      // Check if user exists
+      const user = await storage.getUserById(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      // Don't allow deleting admin users
+      if (user.role === 'admin') {
+        return res.status(400).json({ message: 'Cannot delete admin users' });
+      }
+      
+      // Delete user registrations first
+      const registrations = await storage.getRegistrationsByUserId(userId);
+      for (const registration of registrations) {
+        await storage.deleteRegistration(registration.id);
+      }
+      
+      // If user is enterprise, delete enterprise record
+      if (user.role === 'enterprise') {
+        const enterprise = await storage.getEnterpriseByUserId(userId);
+        if (enterprise) {
+          // Delete enterprise workshops first
+          const workshops = await storage.getWorkshopsByEnterpriseId(enterprise.id);
+          for (const workshop of workshops) {
+            await storage.deleteWorkshop(workshop.id);
+          }
+          await storage.deleteEnterprise(enterprise.id);
+        }
+      }
+      
+      // Delete user
+      const deleted = await storage.deleteUser(userId);
+      if (!deleted) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      res.json({ message: 'User deleted successfully' });
+    } catch (error) {
+      console.error('User deletion error:', error);
       res.status(500).json({ message: 'Server error' });
     }
   });
@@ -503,8 +569,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/enterprises', authenticateToken, requireRole(['admin']), async (req: AuthRequest, res) => {
     try {
       const enterprises = await storage.getAllEnterprises();
-      res.json(enterprises);
+      
+      // Get enterprise details with user info and workshop count
+      const enterprisesWithDetails = await Promise.all(
+        enterprises.map(async (enterprise) => {
+          const user = await storage.getUserById(enterprise.userId);
+          const workshops = await storage.getWorkshopsByEnterpriseId(enterprise.id);
+          return {
+            ...enterprise,
+            user: user ? { ...user, password: undefined } : null,
+            workshopCount: workshops.length
+          };
+        })
+      );
+      
+      res.json(enterprisesWithDetails);
     } catch (error) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+
+  app.delete('/api/admin/enterprises/:id', authenticateToken, requireRole(['admin']), async (req: AuthRequest, res) => {
+    try {
+      const enterpriseId = parseInt(req.params.id);
+      
+      // Check if enterprise exists
+      const enterprise = await storage.getEnterpriseById(enterpriseId);
+      if (!enterprise) {
+        return res.status(404).json({ message: 'Enterprise not found' });
+      }
+      
+      // Delete enterprise workshops first
+      const workshops = await storage.getWorkshopsByEnterpriseId(enterpriseId);
+      for (const workshop of workshops) {
+        // Delete workshop registrations first
+        const registrations = await storage.getRegistrationsByWorkshopId(workshop.id);
+        for (const registration of registrations) {
+          await storage.deleteRegistration(registration.id);
+        }
+        await storage.deleteWorkshop(workshop.id);
+      }
+      
+      // Delete enterprise
+      const deleted = await storage.deleteEnterprise(enterpriseId);
+      if (!deleted) {
+        return res.status(404).json({ message: 'Enterprise not found' });
+      }
+      
+      // Delete associated user account
+      await storage.deleteUser(enterprise.userId);
+      
+      res.json({ message: 'Enterprise deleted successfully' });
+    } catch (error) {
+      console.error('Enterprise deletion error:', error);
       res.status(500).json({ message: 'Server error' });
     }
   });

@@ -69,6 +69,13 @@ WorkshopWise is a comprehensive workshop booking platform that connects professi
 - ✅ Enhanced admin dashboard with registration management for manual approvals
 - ✅ Fixed authentication middleware to include user name in token verification
 - ✅ Added comprehensive registration approval/rejection system for admins
+- ✅ Added instructor and agenda fields to workshop schema and creation form
+- ✅ Implemented user deletion functionality for admins with cascade deletion
+- ✅ Added enterprise deletion functionality with complete cleanup
+- ✅ Enhanced admin user management with activity tracking and registration history
+- ✅ Updated enterprise management with detailed information and workshop counts
+- ✅ Added user protection (admin users cannot be deleted)
+- ✅ Implemented comprehensive user activity display in admin dashboard
 
 ## Default Test Accounts
 - Admin: admin@workshopwise.com / admin123

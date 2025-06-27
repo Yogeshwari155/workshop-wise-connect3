@@ -6,7 +6,7 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Users, Building, BookOpen, TrendingUp, Eye, Check, X, Calendar, MapPin, IndianRupee, RefreshCw } from 'lucide-react';
+import { Users, Building, BookOpen, TrendingUp, Eye, Check, X, Calendar, MapPin, IndianRupee, RefreshCw, Trash2, Activity } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
 
 const AdminDashboard = () => {
@@ -166,6 +166,71 @@ const AdminDashboard = () => {
       toast({
         title: "Error",
         description: "Failed to update registration status",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteUser = async (userId: number, userName: string) => {
+    if (!confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        }
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "User deleted successfully",
+        });
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      } else {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to delete user');
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete user",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteEnterprise = async (enterpriseId: number, companyName: string) => {
+    if (!confirm(`Are you sure you want to delete enterprise "${companyName}"? This will also delete all associated workshops and registrations.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/enterprises/${enterpriseId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        }
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Enterprise deleted successfully",
+        });
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/enterprises'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      } else {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to delete enterprise');
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete enterprise",
         variant: "destructive",
       });
     }
@@ -354,37 +419,64 @@ const AdminDashboard = () => {
                 <CardContent>
                   <div className="space-y-4">
                     {enterprises.map((enterprise: any) => (
-                      <div key={enterprise.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900">{enterprise.companyName}</h3>
-                          <p className="text-sm text-gray-600">{enterprise.email}</p>
-                          <p className="text-sm text-gray-500">{enterprise.description}</p>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Badge variant={
-                            enterprise.status === 'approved' ? 'default' :
-                            enterprise.status === 'rejected' ? 'destructive' : 'secondary'
-                          }>
-                            {enterprise.status}
-                          </Badge>
-                          {enterprise.status === 'pending' && (
-                            <>
-                              <Button
-                                size="sm"
-                                onClick={() => handleEnterpriseAction(enterprise.id, 'approve')}
-                                className="bg-green-600 hover:bg-green-700"
-                              >
-                                <Check className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => handleEnterpriseAction(enterprise.id, 'reject')}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </>
-                          )}
+                      <div key={enterprise.id} className="p-4 border rounded-lg">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-semibold text-gray-900">{enterprise.companyName}</h3>
+                              <Badge variant={
+                                enterprise.status === 'approved' ? 'default' :
+                                enterprise.status === 'rejected' ? 'destructive' : 'secondary'
+                              }>
+                                {enterprise.status}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-gray-600 mt-1">{enterprise.user?.email}</p>
+                            <p className="text-sm text-gray-600 mt-1">Contact: {enterprise.user?.name}</p>
+                            <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                              <span>Domain: {enterprise.domain}</span>
+                              <span>Location: {enterprise.location}</span>
+                              <span>Workshops: {enterprise.workshopCount || 0}</span>
+                            </div>
+                            {enterprise.website && (
+                              <p className="text-sm text-blue-600 mt-1">
+                                <a href={enterprise.website} target="_blank" rel="noopener noreferrer">
+                                  {enterprise.website}
+                                </a>
+                              </p>
+                            )}
+                            <p className="text-xs text-gray-500 mt-2">
+                              Registered {new Date(enterprise.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                          
+                          <div className="flex items-center space-x-2 ml-4">
+                            {enterprise.status === 'pending' && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleEnterpriseAction(enterprise.id, 'approve')}
+                                  className="bg-green-600 hover:bg-green-700"
+                                >
+                                  <Check className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => handleEnterpriseAction(enterprise.id, 'reject')}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleDeleteEnterprise(enterprise.id, enterprise.companyName)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -462,16 +554,63 @@ const AdminDashboard = () => {
                 <CardContent>
                   <div className="space-y-4">
                     {users.map((user: any) => (
-                      <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900">{user.name}</h3>
-                          <p className="text-sm text-gray-600">{user.email}</p>
-                          <Badge variant="outline" className="mt-1">
-                            {user.role}
-                          </Badge>
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          Joined {new Date(user.createdAt).toLocaleDateString()}
+                      <div key={user.id} className="p-4 border rounded-lg">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-semibold text-gray-900">{user.name}</h3>
+                              <Badge variant="outline">
+                                {user.role}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-gray-600 mt-1">{user.email}</p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              Joined {new Date(user.createdAt).toLocaleDateString()}
+                            </p>
+                            
+                            {/* User Activities */}
+                            {user.registrations && user.registrations.length > 0 && (
+                              <div className="mt-3">
+                                <div className="flex items-center gap-1 text-sm text-gray-700 mb-2">
+                                  <Activity className="h-4 w-4" />
+                                  <span>Workshop Registrations ({user.registrations.length})</span>
+                                </div>
+                                <div className="space-y-1">
+                                  {user.registrations.slice(0, 3).map((registration: any) => (
+                                    <div key={registration.id} className="text-xs text-gray-600 flex items-center justify-between">
+                                      <span>{registration.workshop?.title || 'Workshop'}</span>
+                                      <div className="flex items-center gap-2">
+                                        <Badge variant={
+                                          registration.status === 'approved' ? 'default' :
+                                          registration.status === 'rejected' ? 'destructive' : 'secondary'
+                                        } className="text-xs">
+                                          {registration.status}
+                                        </Badge>
+                                        <span>{new Date(registration.createdAt).toLocaleDateString()}</span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                  {user.registrations.length > 3 && (
+                                    <div className="text-xs text-gray-500">
+                                      +{user.registrations.length - 3} more registrations
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          
+                          <div className="flex items-center space-x-2 ml-4">
+                            {user.role !== 'admin' && (
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleDeleteUser(user.id, user.name)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}
