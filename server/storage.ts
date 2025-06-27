@@ -168,6 +168,39 @@ export class PostgresStorage implements IStorage {
       .limit(1);
     return result[0];
   }
+
+    async getUserProfile(userId: number) {
+    const [profile] = await this.db.select()
+      .from(userProfiles)
+      .where(eq(userProfiles.userId, userId));
+    return profile;
+  }
+
+  async updateUserProfile(userId: number, data: Partial<typeof userProfiles.$inferInsert>) {
+    // Try to update existing profile
+    const [updated] = await this.db.update(userProfiles)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(userProfiles.userId, userId))
+      .returning();
+
+    if (updated) {
+      return updated;
+    }
+
+    // If no profile exists, create one
+    const [created] = await this.db.insert(userProfiles)
+      .values({ ...data, userId })
+      .returning();
+    return created;
+  }
+
+  async updateUser(id: number, data: Partial<typeof users.$inferInsert>) {
+    const [updated] = await this.db.update(users)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return updated;
+  }
 }
 
 export const storage = new PostgresStorage();

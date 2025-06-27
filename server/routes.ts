@@ -554,6 +554,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Profile management routes
+  app.get('/api/profile', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const profile = await storage.getUserProfile(req.user!.id);
+      res.json(profile || {});
+    } catch (error) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+
+  app.put('/api/profile', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { name, phone, location, bio, company, skills, experience } = req.body;
+      
+      const profileData = {
+        userId: req.user!.id,
+        name: name || req.user!.name,
+        phone: phone || '',
+        location: location || '',
+        bio: bio || '',
+        company: company || '',
+        skills: skills || '',
+        experience: experience || ''
+      };
+
+      const profile = await storage.updateUserProfile(req.user!.id, profileData);
+      
+      // Also update user name if changed
+      if (name && name !== req.user!.name) {
+        await storage.updateUser(req.user!.id, { name });
+      }
+
+      res.json(profile);
+    } catch (error) {
+      console.error('Profile update error:', error);
+      res.status(400).json({ message: 'Failed to update profile' });
+    }
+  });
+
   // File upload for payment screenshots
   app.post('/api/upload/payment', authenticateToken, upload.single('screenshot'), (req: AuthRequest, res) => {
     if (!req.file) {

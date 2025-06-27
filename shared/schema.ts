@@ -47,17 +47,30 @@ export const workshops = pgTable("workshops", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const registrations = pgTable("registrations", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
-  workshopId: integer("workshop_id").references(() => workshops.id).notNull(),
-  reason: text("reason"),
-  experience: text("experience"),
-  expectations: text("expectations"),
-  status: text("status", { enum: ["pending", "approved", "rejected", "confirmed"] }).notNull().default("pending"),
-  paymentScreenshot: text("payment_screenshot"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+export const registrations = pgTable('registrations', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id).notNull(),
+  workshopId: integer('workshop_id').references(() => workshops.id).notNull(),
+  reason: text('reason'),
+  experience: text('experience'),
+  expectations: text('expectations'),
+  status: text('status', { enum: ["pending", "approved", "rejected", "confirmed"] }).notNull().default('pending'),
+  paymentScreenshot: text('payment_screenshot'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const userProfiles = pgTable('user_profiles', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id).notNull().unique(),
+  phone: text('phone'),
+  location: text('location'),
+  bio: text('bio'),
+  company: text('company'),
+  skills: text('skills'),
+  experience: text('experience'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 // Schemas for validation

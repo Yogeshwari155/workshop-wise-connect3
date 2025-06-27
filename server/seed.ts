@@ -2,6 +2,7 @@ import { db } from "./db";
 import { users, enterprises, workshops, registrations } from "@shared/schema";
 import { hashPassword } from "./utils/auth";
 import { eq } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 
 export async function seedDatabase() {
   try {
@@ -177,6 +178,38 @@ export async function seedDatabase() {
       });
       console.log("✅ Sample user Rajesh created");
     }
+
+    // Create registrations table
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS registrations (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) NOT NULL,
+      workshop_id INTEGER REFERENCES workshops(id) NOT NULL,
+      reason TEXT,
+      experience TEXT,
+      expectations TEXT,
+      status TEXT NOT NULL DEFAULT 'pending',
+      payment_screenshot TEXT,
+      created_at TIMESTAMP DEFAULT NOW(),
+      updated_at TIMESTAMP DEFAULT NOW()
+    )
+  `);
+
+  // Create user profiles table
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS user_profiles (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) NOT NULL UNIQUE,
+      phone TEXT,
+      location TEXT,
+      bio TEXT,
+      company TEXT,
+      skills TEXT,
+      experience TEXT,
+      created_at TIMESTAMP DEFAULT NOW(),
+      updated_at TIMESTAMP DEFAULT NOW()
+    )
+  `);
 
     console.log("✅ Database seeded successfully");
   } catch (error) {
