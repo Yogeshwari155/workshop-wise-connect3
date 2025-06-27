@@ -3,13 +3,15 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
+import { Badge } from '../components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group';
 import { Textarea } from '../components/ui/textarea';
+import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group';
 import { useToast } from '../hooks/use-toast';
-import { Calendar, IndianRupee, Upload, CheckCircle } from 'lucide-react';
+import { useWorkshop, useRegisterForWorkshop } from '../hooks/useWorkshops';
+import { Calendar, MapPin, IndianRupee, Users, Upload, CreditCard, Clock } from 'lucide-react';
 
 const WorkshopRegistration = () => {
   const { id } = useParams();

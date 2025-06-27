@@ -18,7 +18,7 @@ import { z } from 'zod';
 import { format } from 'date-fns';
 import { CalendarIcon, Plus, Users, Eye, Clock, MapPin, IndianRupee, RefreshCw } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { enterpriseApi, apiRequest, workshopApi } from '../utils/api';
+import { enterpriseApi, apiRequest } from '../utils/api';
 import { useToast } from '../hooks/use-toast';
 
 const workshopSchema = z.object({
@@ -135,14 +135,14 @@ const EnterpriseDashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Navigation />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Enterprise Dashboard</h1>
             <p className="text-gray-600 mt-2">Welcome back, {user?.name}</p>
           </div>
-          
+
           <div className="flex gap-3">
             <Button 
               onClick={() => refetch()} 
@@ -152,7 +152,7 @@ const EnterpriseDashboard = () => {
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
             </Button>
-            
+
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] hover:from-purple-600 hover:to-purple-700 text-white">
@@ -164,7 +164,7 @@ const EnterpriseDashboard = () => {
               <DialogHeader>
                 <DialogTitle>Create New Workshop</DialogTitle>
               </DialogHeader>
-              
+
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -181,7 +181,7 @@ const EnterpriseDashboard = () => {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="description"
@@ -199,7 +199,7 @@ const EnterpriseDashboard = () => {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="date"
@@ -255,7 +255,7 @@ const EnterpriseDashboard = () => {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="time"
@@ -269,7 +269,7 @@ const EnterpriseDashboard = () => {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="duration"
@@ -283,7 +283,7 @@ const EnterpriseDashboard = () => {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="mode"
@@ -306,7 +306,7 @@ const EnterpriseDashboard = () => {
                         </FormItem>
                       )}
                     />
-                    
+
                     {form.watch('mode') !== 'online' && (
                       <FormField
                         control={form.control}
@@ -322,7 +322,7 @@ const EnterpriseDashboard = () => {
                         )}
                       />
                     )}
-                    
+
                     <FormField
                       control={form.control}
                       name="isFree"
@@ -347,7 +347,7 @@ const EnterpriseDashboard = () => {
                         </FormItem>
                       )}
                     />
-                    
+
                     {!form.watch('isFree') && (
                       <FormField
                         control={form.control}
@@ -368,7 +368,7 @@ const EnterpriseDashboard = () => {
                         )}
                       />
                     )}
-                    
+
                     <FormField
                       control={form.control}
                       name="seats"
@@ -387,7 +387,7 @@ const EnterpriseDashboard = () => {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="registrationMode"
@@ -409,7 +409,7 @@ const EnterpriseDashboard = () => {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="tags"
@@ -424,7 +424,7 @@ const EnterpriseDashboard = () => {
                       )}
                     />
                   </div>
-                  
+
                   <div className="flex justify-end space-x-4">
                     <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
                       Cancel
@@ -459,7 +459,7 @@ const EnterpriseDashboard = () => {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -475,7 +475,7 @@ const EnterpriseDashboard = () => {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -491,7 +491,7 @@ const EnterpriseDashboard = () => {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -524,7 +524,7 @@ const EnterpriseDashboard = () => {
                       </div>
                       {getStatusBadge(workshop.status)}
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-4">
                       <div className="flex items-center space-x-2">
                         <CalendarIcon className="h-4 w-4" />
@@ -552,7 +552,7 @@ const EnterpriseDashboard = () => {
                         <span>{workshop.isFree ? 'Free' : `₹${workshop.price}`}</span>
                       </div>
                     </div>
-                    
+
                     <Button 
                       variant="outline" 
                       size="sm" 
@@ -565,7 +565,7 @@ const EnterpriseDashboard = () => {
                   </CardContent>
                 </Card>
               ))}
-              
+
               {workshops.length === 0 && (
                 <Card>
                   <CardContent className="p-8 text-center">
@@ -576,13 +576,13 @@ const EnterpriseDashboard = () => {
               )}
             </div>
           </div>
-          
+
           {/* Registrations Panel */}
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
               {selectedWorkshop ? `Registrations: ${selectedWorkshop.title}` : 'Select a Workshop'}
             </h2>
-            
+
             {selectedWorkshop ? (
               <div className="space-y-4">
                 {registrations.map((registration: any) => (
@@ -607,7 +607,7 @@ const EnterpriseDashboard = () => {
                     </CardContent>
                   </Card>
                 ))}
-                
+
                 {registrations.length === 0 && (
                   <Card>
                     <CardContent className="p-8 text-center">
@@ -626,7 +626,7 @@ const EnterpriseDashboard = () => {
           </div>
         </div>
       </div>
-      
+
       <Footer />
     </div>
   );

@@ -13,7 +13,7 @@ const WorkshopDetail = () => {
   const { isAuthenticated } = useAuth();
 
   // Mock workshop data - in real app, this would come from API
-  const workshop = {
+  const workshopData = {
     id: 1,
     title: "Advanced React Development",
     company: "TechCorp Solutions",
@@ -73,25 +73,25 @@ const WorkshopDetail = () => {
         <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
           <div className="relative">
             <img 
-              src={workshop.image} 
-              alt={workshop.title}
+              src={workshopData.image} 
+              alt={workshopData.title}
               className="w-full h-64 md:h-80 object-cover"
             />
             <div className="absolute top-6 left-6 flex gap-2">
-              {workshop.isFree ? (
+              {workshopData.isFree ? (
                 <Badge className="bg-green-500 text-white border-0 text-lg px-4 py-2">FREE</Badge>
               ) : (
                 <Badge className="bg-primary-500 text-white border-0 text-lg px-4 py-2">PAID</Badge>
               )}
               <Badge variant="secondary" className="bg-white/90 text-gray-700 text-lg px-4 py-2">
-                {workshop.mode}
+                {workshopData.mode}
               </Badge>
             </div>
             <div className="absolute top-6 right-6 bg-white/90 backdrop-blur-sm rounded-xl p-3">
               <div className="flex items-center space-x-2">
                 <Star className="h-5 w-5 text-yellow-500 fill-current" />
-                <span className="text-lg font-semibold">{workshop.rating}</span>
-                <span className="text-gray-600">({workshop.reviews} reviews)</span>
+                <span className="text-lg font-semibold">{workshopData.rating}</span>
+                <span className="text-gray-600">({workshopData.reviews} reviews)</span>
               </div>
             </div>
           </div>
@@ -101,13 +101,13 @@ const WorkshopDetail = () => {
               <div className="lg:col-span-2 space-y-6">
                 <div>
                   <h1 className="text-3xl md:text-4xl font-display font-bold text-gray-900 mb-2">
-                    {workshop.title}
+                    {workshopData.title}
                   </h1>
-                  <p className="text-xl text-gray-600 font-medium">{workshop.company}</p>
+                  <p className="text-xl text-gray-600 font-medium">{workshopData.company}</p>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {workshop.tags.map((tag) => (
+                  {workshopData.tags.map((tag) => (
                     <Badge key={tag} variant="secondary">
                       {tag}
                     </Badge>
@@ -118,29 +118,29 @@ const WorkshopDetail = () => {
                   <div className="flex items-center space-x-2 text-gray-600">
                     <Calendar className="h-5 w-5" />
                     <div>
-                      <div className="font-medium">{workshop.date}</div>
-                      <div>{workshop.time}</div>
+                      <div className="font-medium">{workshopData.date}</div>
+                      <div>{workshopData.time}</div>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2 text-gray-600">
                     <Clock className="h-5 w-5" />
                     <div>
-                      <div className="font-medium">{workshop.duration}</div>
+                      <div className="font-medium">{workshopData.duration}</div>
                       <div>Duration</div>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2 text-gray-600">
                     <Users className="h-5 w-5" />
                     <div>
-                      <div className="font-medium">{workshop.seats - workshop.bookedSeats} left</div>
-                      <div>of {workshop.seats} seats</div>
+                      <div className="font-medium">{workshopData.seats - workshopData.bookedSeats} left</div>
+                      <div>of {workshopData.seats} seats</div>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2 text-gray-600">
                     <Calendar className="h-5 w-5" />
                     <div>
                       <div className="font-medium">Deadline</div>
-                      <div>{workshop.registrationDeadline}</div>
+                      <div>{workshopData.registrationDeadline}</div>
                     </div>
                   </div>
                 </div>
@@ -151,16 +151,16 @@ const WorkshopDetail = () => {
                 <Card className="border-0 shadow-xl">
                   <CardContent className="p-6 space-y-4">
                     <div className="text-center">
-                      {workshop.isFree ? (
+                      {workshopData.isFree ? (
                         <div className="text-3xl font-bold text-green-600">FREE</div>
                       ) : (
                         <div>
                           <div className="flex items-center justify-center space-x-1">
                             <IndianRupee className="h-6 w-6 text-gray-900" />
-                            <span className="text-3xl font-bold text-gray-900">{workshop.price}</span>
+                            <span className="text-3xl font-bold text-gray-900">{workshopData.price}</span>
                           </div>
-                          {workshop.originalPrice && (
-                            <div className="text-lg text-gray-500 line-through">₹{workshop.originalPrice}</div>
+                          {workshopData.originalPrice && (
+                            <div className="text-lg text-gray-500 line-through">₹{workshopData.originalPrice}</div>
                           )}
                         </div>
                       )}
@@ -169,18 +169,18 @@ const WorkshopDetail = () => {
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span>Seats Available</span>
-                        <span className="font-medium">{workshop.seats - workshop.bookedSeats} of {workshop.seats}</span>
+                        <span className="font-medium">{workshopData.seats - workshopData.bookedSeats} of {workshopData.seats}</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div 
                           className="bg-gradient-to-r from-primary-500 to-accent-500 h-2 rounded-full" 
-                          style={{ width: `${(workshop.bookedSeats / workshop.seats) * 100}%` }}
+                          style={{ width: `${(workshopData.bookedSeats / workshopData.seats) * 100}%` }}
                         ></div>
                       </div>
                     </div>
 
                     {isAuthenticated ? (
-                      <Link to={`/workshop/${workshop.id}/register`} className="block">
+                      <Link to={`/workshop/${workshopData.id}/register`} className="block">
                         <Button className="w-full bg-gradient-to-r from-[#7C3AED] to-[#7C3AED] hover:from-[#6D28D9] hover:to-[#6D28D9] text-white py-3 text-lg font-semibold">
                           Register Now
                         </Button>
@@ -202,7 +202,7 @@ const WorkshopDetail = () => {
                     )}
 
                     <div className="text-center text-xs text-gray-500 pt-2 border-t">
-                      Registration closes on {workshop.registrationDeadline}
+                      Registration closes on {workshopData.registrationDeadline}
                     </div>
                   </CardContent>
                 </Card>
@@ -221,7 +221,7 @@ const WorkshopDetail = () => {
                   About This Workshop
                 </h2>
                 <div className="prose prose-gray max-w-none">
-                  {workshop.description.split('\n').map((paragraph, index) => (
+                  {workshopData.description.split('\n').map((paragraph, index) => (
                     <p key={index} className="text-gray-700 leading-relaxed mb-4">
                       {paragraph}
                     </p>
@@ -237,7 +237,7 @@ const WorkshopDetail = () => {
                   Workshop Agenda
                 </h2>
                 <div className="space-y-4">
-                  {workshop.agenda.map((item, index) => (
+                  {workshopData.agenda.map((item, index) => (
                     <div key={index} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
                       <div className="bg-gradient-to-r from-primary-500 to-accent-500 text-white w-12 h-12 rounded-full flex items-center justify-center font-bold">
                         {index + 1}
@@ -266,24 +266,24 @@ const WorkshopDetail = () => {
                 <div className="space-y-4">
                   <div className="flex items-center space-x-4">
                     <img 
-                      src={workshop.instructor.avatar} 
-                      alt={workshop.instructor.name}
+                      src={workshopData.instructor.avatar} 
+                      alt={workshopData.instructor.name}
                       className="w-16 h-16 rounded-full object-cover"
                     />
                     <div>
-                      <h3 className="font-semibold text-gray-900">{workshop.instructor.name}</h3>
-                      <p className="text-gray-600 text-sm">{workshop.instructor.designation}</p>
+                      <h3 className="font-semibold text-gray-900">{workshopData.instructor.name}</h3>
+                      <p className="text-gray-600 text-sm">{workshopData.instructor.designation}</p>
                     </div>
                   </div>
 
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center space-x-2 text-gray-600">
                       <Building className="h-4 w-4" />
-                      <span>{workshop.instructor.company}</span>
+                      <span>{workshopData.instructor.company}</span>
                     </div>
                     <div className="flex items-center space-x-2 text-gray-600">
                       <User className="h-4 w-4" />
-                      <span>{workshop.instructor.experience} experience</span>
+                      <span>{workshopData.instructor.experience} experience</span>
                     </div>
                   </div>
                 </div>

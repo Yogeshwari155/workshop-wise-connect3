@@ -53,17 +53,16 @@ const AppRoutes = () => {
       <Route path="/" element={<Index />} />
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
-      <Route path="/workshops" element={<Workshops />} />
-      <Route path="/workshops/:id" element={<WorkshopDetail />} />
+      <Route path="/workshops" element={<PrivateRoute><Workshops /></PrivateRoute>} />
+      <Route path="/workshop/:id" element={<PrivateRoute><WorkshopDetail /></PrivateRoute>} />
+      <Route path="/workshop/:id/register" element={<PrivateRoute><WorkshopRegistration /></PrivateRoute>} />
+      <Route path="/dashboard" element={<PrivateRoute><UserDashboard /></PrivateRoute>} />
+      <Route path="/enterprise" element={<PrivateRoute><EnterpriseDashboard /></PrivateRoute>} />
+      <Route path="/admin" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
+
       <Route path="/register-workshop/:id" element={<WorkshopRegistration />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-
-      <Route path="/dashboard" element={
-        <PrivateRoute>
-          <UserDashboard />
-        </PrivateRoute>
-      } />
 
       <Route path="/enterprise-dashboard" element={
         <PrivateRoute allowedRoles={['enterprise']}>
