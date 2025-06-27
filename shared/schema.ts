@@ -80,10 +80,8 @@ export const insertWorkshopSchema = createInsertSchema(workshops).omit({
   updatedAt: true,
 });
 
-export const insertRegistrationSchema = createInsertSchema(registrations).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
+export const insertRegistrationSchema = createInsertSchema(registrations).omit({ userId: true, id: true, createdAt: true, updatedAt: true }).extend({
+  userId: z.number().optional()
 });
 
 export const loginSchema = z.object({

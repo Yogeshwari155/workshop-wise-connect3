@@ -242,7 +242,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Registration routes
   app.post('/api/registrations', authenticateToken, requireRole(['user']), async (req: AuthRequest, res) => {
     try {
-      const registrationData = insertRegistrationSchema.parse(req.body);
+      console.log('Registration request body:', req.body);
+      console.log('Authenticated user:', req.user);
+      
+      if (!req.user) {
+        return res.status(401).json({ message: 'User not authenticated' });
+      }
+
+      const registrationData = insertRegistrationSchema.parse({
+        ...req.body,
+        userId: req.user.id
+      });
 
       // Check if workshop exists
       const workshop = await storage.getWorkshopById(registrationData.workshopId);
@@ -295,8 +305,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const registration = await storage.createRegistration({
-        ...registrationData,
-        userId: req.user!.id,
+        workshopId: registrationData.workshopId,
+        reason: registrationData.reason || '',
+        paymentScreenshot: registrationData.paymentScreenshot || null,
+        userId: req.user.id,
         status: status as "pending" | "approved" | "rejected" | "confirmed"
       });
 
