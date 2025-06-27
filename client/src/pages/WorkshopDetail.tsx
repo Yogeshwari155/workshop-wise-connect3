@@ -116,9 +116,13 @@ const WorkshopDetail = () => {
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div className="flex items-center space-x-2 text-gray-600">
-                    <Calendar className="h-5 w-5" />
+                    <Calendar className="h-4 w-4" />
                     <div>
-                      <div className="font-medium">{workshopData.date}</div>
+                      <div className="font-medium">{new Date(workshopData.date).toLocaleDateString('en-US', { 
+                          day: 'numeric', 
+                          month: 'short', 
+                          year: 'numeric' 
+                        })}</div>
                       <div>{workshopData.time}</div>
                     </div>
                   </div>
@@ -130,12 +134,10 @@ const WorkshopDetail = () => {
                     </div>
                   </div>
                   <div className="flex items-center space-x-2 text-gray-600">
-                    <Users className="h-5 w-5" />
-                    <div>
-                      <div className="font-medium">{workshopData.seats - workshopData.bookedSeats} left</div>
-                      <div>of {workshopData.seats} seats</div>
-                    </div>
+                    <Users className="h-4 w-4" />
+                    <span>{workshopData.seats - workshopData.registeredSeats} left</span>
                   </div>
+                  <div>of {workshopData.seats} seats</div>
                   <div className="flex items-center space-x-2 text-gray-600">
                     <Calendar className="h-5 w-5" />
                     <div>
