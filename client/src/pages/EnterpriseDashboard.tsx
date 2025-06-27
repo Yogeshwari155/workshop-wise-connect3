@@ -5,21 +5,22 @@ import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../components/ui/form';
-import { Calendar } from '../components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
+import { Calendar, MapPin, Users, Plus, Edit, Trash2, Eye } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../hooks/use-toast';
+import { workshopApi } from '../utils/api';
+import { enterpriseApi } from '../utils/api';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { CalendarIcon, Plus, Users, Eye, Clock, MapPin, IndianRupee, RefreshCw } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { enterpriseApi, workshopApi } from '../utils/api';
-import { useToast } from '../hooks/use-toast';
+import { CalendarIcon, Clock, IndianRupee, RefreshCw } from 'lucide-react';
 
 const workshopSchema = z.object({
   title: z.string().min(1, 'Title is required'),

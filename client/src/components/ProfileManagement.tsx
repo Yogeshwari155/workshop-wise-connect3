@@ -44,14 +44,26 @@ const ProfileManagement = () => {
             ...prev,
             ...profileData
           }));
+        } else {
+            console.error('Failed to load profile:', response.status, response.statusText);
+            toast({
+                variant: "destructive",
+                title: "Failed to Load Profile",
+                description: `Failed to load profile. Status: ${response.status} ${response.statusText}`,
+            });
         }
       } catch (error) {
         console.error('Failed to load profile:', error);
+        toast({
+            variant: "destructive",
+            title: "Failed to Load Profile",
+            description: "Failed to load profile. Please try again.",
+        });
       }
     };
 
     loadProfile();
-  }, [user]);
+  }, [user, toast]); // Added toast to the dependency array
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -79,6 +91,12 @@ const ProfileManagement = () => {
       });
 
       if (!response.ok) {
+          console.error('Failed to update profile:', response.status, response.statusText);
+          toast({
+              variant: "destructive",
+              title: "Update Failed",
+              description: `Could not update profile. Status: ${response.status} ${response.statusText}`,
+          });
         throw new Error('Failed to update profile');
       }
 
@@ -89,6 +107,7 @@ const ProfileManagement = () => {
 
       setIsEditing(false);
     } catch (error) {
+        console.error('Failed to update profile:', error);
       toast({
         variant: "destructive",
         title: "Update Failed",

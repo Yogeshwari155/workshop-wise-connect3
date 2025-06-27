@@ -1,17 +1,20 @@
+The code changes fix the missing CheckCircle import in the WorkshopRegistration component.
+```
+```replit_final_file
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Badge } from '../components/ui/badge';
+import { Textarea } from '../components/ui/textarea';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { Textarea } from '../components/ui/textarea';
-import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group';
+import { Calendar, Clock, MapPin, User, Star, Upload, ArrowLeft, CheckCircle } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
 import { useWorkshop, useRegisterForWorkshop } from '../hooks/useWorkshops';
-import { Calendar, MapPin, IndianRupee, Users, Upload, CreditCard, Clock, CheckCircle } from 'lucide-react';
+import { IndianRupee, Users, CreditCard } from 'lucide-react';
 
 const WorkshopRegistration = () => {
   const { id } = useParams();
@@ -105,7 +108,7 @@ const WorkshopRegistration = () => {
           description: "Your request has been sent to admin for approval. You'll be notified via email.",
         });
       }
-      
+
       navigate('/dashboard');
     } catch (error) {
       toast({

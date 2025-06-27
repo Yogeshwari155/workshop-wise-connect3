@@ -47,30 +47,41 @@ export const workshops = pgTable("workshops", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const registrations = pgTable('registrations', {
-  id: serial('id').primaryKey(),
-  userId: integer('user_id').references(() => users.id).notNull(),
-  workshopId: integer('workshop_id').references(() => workshops.id).notNull(),
-  reason: text('reason'),
-  experience: text('experience'),
-  expectations: text('expectations'),
-  status: text('status', { enum: ["pending", "approved", "rejected", "confirmed"] }).notNull().default('pending'),
-  paymentScreenshot: text('payment_screenshot'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+export const registrations = pgTable("registrations", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  workshopId: integer("workshop_id").notNull().references(() => workshops.id, { onDelete: "cascade" }),
+  reason: text("reason"),
+  experience: text("experience"),
+  expectations: text("expectations"),
+  status: text("status", { enum: ["pending", "approved", "rejected", "confirmed"] }).default("pending").notNull(),
+  paymentScreenshot: text("payment_screenshot"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const userProfiles = pgTable('user_profiles', {
-  id: serial('id').primaryKey(),
-  userId: integer('user_id').references(() => users.id).notNull().unique(),
-  phone: text('phone'),
-  location: text('location'),
-  bio: text('bio'),
-  company: text('company'),
-  skills: text('skills'),
-  experience: text('experience'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+export const userProfiles = pgTable("user_profiles", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  phone: text("phone").default(""),
+  location: text("location").default(""),
+  bio: text("bio").default(""),
+  company: text("company").default(""),
+  skills: text("skills").default(""),
+  experience: text("experience").default(""),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertRegistrationSchema = createInsertSchema(registrations).omit({ userId: true, id: true, createdAt: true, updatedAt: true }).extend({
+  userId: z.number().optional()
+});
+
+export const insertUserProfileSchema = createInsertSchema(userProfiles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 // Schemas for validation
@@ -91,10 +102,6 @@ export const insertWorkshopSchema = createInsertSchema(workshops).omit({
   enterpriseId: true,
   createdAt: true,
   updatedAt: true,
-});
-
-export const insertRegistrationSchema = createInsertSchema(registrations).omit({ userId: true, id: true, createdAt: true, updatedAt: true }).extend({
-  userId: z.number().optional()
 });
 
 export const loginSchema = z.object({
@@ -125,13 +132,12 @@ export const registerEnterpriseSchema = z.object({
 
 // Export types
 export type User = typeof users.$inferSelect;
-export type InsertUser = z.infer<typeof insertUserSchema>;
+export type InsertUser = typeof users.$inferInsert;
 export type Enterprise = typeof enterprises.$inferSelect;
-export type InsertEnterprise = z.infer<typeof insertEnterpriseSchema>;
+export type InsertEnterprise = typeof enterprises.$inferInsert;
 export type Workshop = typeof workshops.$inferSelect;
-export type InsertWorkshop = z.infer<typeof insertWorkshopSchema>;
+export type InsertWorkshop = typeof workshops.$inferInsert;
 export type Registration = typeof registrations.$inferSelect;
-export type InsertRegistration = z.infer<typeof insertRegistrationSchema>;
-export type LoginRequest = z.infer<typeof loginSchema>;
-export type RegisterUserRequest = z.infer<typeof registerUserSchema>;
-export type RegisterEnterpriseRequest = z.infer<typeof registerEnterpriseSchema>;
+export type InsertRegistration = typeof registrations.$inferInsert;
+export type UserProfile = typeof userProfiles.$inferSelect;
+export type InsertUserProfile = typeof userProfiles.$inferInsert;

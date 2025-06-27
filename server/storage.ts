@@ -1,6 +1,6 @@
 import { db } from "./db";
-import { users, enterprises, workshops, registrations } from "@shared/schema";
-import type { User, Enterprise, Workshop, Registration, InsertUser, InsertEnterprise, InsertWorkshop, InsertRegistration } from "@shared/schema";
+import { users, enterprises, workshops, registrations, userProfiles } from "@shared/schema";
+import type { User, Enterprise, Workshop, Registration, UserProfile, InsertUser, InsertEnterprise, InsertWorkshop, InsertRegistration, InsertUserProfile } from "@shared/schema";
 import { eq, desc, and } from "drizzle-orm";
 
 interface IStorage {
@@ -37,6 +37,10 @@ interface IStorage {
   updateRegistration(id: number, updates: Partial<InsertRegistration>): Promise<Registration | undefined>;
   deleteRegistration(id: number): Promise<boolean>;
   getUserRegistrationForWorkshop(userId: number, workshopId: number): Promise<Registration | undefined>;
+  
+  // Profile methods
+  getUserProfile(userId: number): Promise<UserProfile | undefined>;
+  updateUserProfile(userId: number, data: Partial<InsertUserProfile>): Promise<UserProfile>;
 }
 
 export class PostgresStorage implements IStorage {
@@ -169,37 +173,30 @@ export class PostgresStorage implements IStorage {
     return result[0];
   }
 
-    async getUserProfile(userId: number) {
-    const [profile] = await this.db.select()
+    async getUserProfile(userId: number): Promise<UserProfile | undefined> {
+    const result = await db.select()
       .from(userProfiles)
-      .where(eq(userProfiles.userId, userId));
-    return profile;
+      .where(eq(userProfiles.userId, userId))
+      .limit(1);
+    return result[0];
   }
 
-  async updateUserProfile(userId: number, data: Partial<typeof userProfiles.$inferInsert>) {
+  async updateUserProfile(userId: number, data: Partial<InsertUserProfile>): Promise<UserProfile> {
     // Try to update existing profile
-    const [updated] = await this.db.update(userProfiles)
+    const updated = await db.update(userProfiles)
       .set({ ...data, updatedAt: new Date() })
       .where(eq(userProfiles.userId, userId))
       .returning();
 
-    if (updated) {
-      return updated;
+    if (updated.length > 0) {
+      return updated[0];
     }
 
     // If no profile exists, create one
-    const [created] = await this.db.insert(userProfiles)
+    const created = await db.insert(userProfiles)
       .values({ ...data, userId })
       .returning();
-    return created;
-  }
-
-  async updateUser(id: number, data: Partial<typeof users.$inferInsert>) {
-    const [updated] = await this.db.update(users)
-      .set({ ...data, updatedAt: new Date() })
-      .where(eq(users.id, id))
-      .returning();
-    return updated;
+    return created[0];
   }
 }
 
